@@ -1,0 +1,1 @@
+// mörkt läge m mörk statisk bild vs ljust läge med ljus pastellig bild 
