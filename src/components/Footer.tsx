@@ -1,4 +1,5 @@
 // Behövs detta ens till något? Eventuellt till laptop-versionen av sidan?
+import '../styles/footer.css';
 
 export default function Footer() {
   return (

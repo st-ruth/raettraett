@@ -1,3 +1,4 @@
+import '../styles/dishCard.css';
 import type {Dish} from '../types/dish';
 
 interface DishCardProps {

@@ -1,0 +1,43 @@
+.header-container {
+  padding: 16px;
+  background-color: #fdfdfd; /* Ljus och fräsch bakgrund */
+  border-bottom: 1px solid #eaeaea;
+  display: flex;
+  align-items: center;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Skapar ett lagom mellanrum mellan cirkeln och texten */
+}
+
+.header-left h2 {
+  margin: 0;
+  color: #1e1e24;
+  font-size: 1.5rem;
+  letter-spacing: -0.5px; /* Ger texten ett lite tajtare utseende */
+}
+
+.menu-button {
+  background-color: #f0f0f0; /* Ljusgrå bakgrund för cirkeln */
+  border: none;
+  color: #1e1e24;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;  /* Bredd på cirkeln */
+  height: 44px; /* Höjd på cirkeln */
+  border-radius: 50%; /* Gör knappen helt rund */
+  transition: background-color 0.2s ease-in-out;
+}
+
+.menu-button:hover {
+  background-color: #e4e4e4; /* Mörknar lite när man hovrar över den */
+}
+
+.header-icon {
+  width: 24px;
+  height: 24px;
+}
