@@ -1,0 +1,14 @@
+/*:root för färger & typografi*/
+:root {
+/*FONT*/
+--font-family: 'Outfit', sans-serif;
+--font-weight-thin: 100;
+--font-weight-light: 200;
+}
+
+/*styleing för body (statisk bakgrund)*/
+
+body {
+    font-family: var(--font-family);
+    font-weight: var(--font-weight-thin);
+}

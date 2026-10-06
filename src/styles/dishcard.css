@@ -1,0 +1,22 @@
+/*styleing för matkorten*/
+.dish-card {
+    background-color: #1e1e24;
+    border: 2px solid #33333d;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 350px;
+}
+
+/*små badges inuti korten*/
+.dish-card span {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 4px 8px;
+  background-color: #2a2a36;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
