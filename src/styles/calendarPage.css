@@ -1,0 +1,86 @@
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  background-color: #f4f4f6; /* Ljusgrå bakgrund */
+}
+
+/* --- Top Strip (Matsedel + Rutor) --- */
+.calendar-top-strip {
+  padding: 16px;
+  background-color: #f4f4f6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.strip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.strip-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: #1e1e24;
+}
+
+.strip-divider {
+  flex-grow: 1;
+  height: 1px;
+  background-color: #d1d1d1;
+  margin: 0 16px;
+}
+
+.strip-arrows {
+  display: flex;
+  gap: 12px;
+  color: #1e1e24;
+  cursor: pointer;
+}
+
+.strip-boxes {
+  display: flex;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.strip-box {
+  flex: 1;
+  aspect-ratio: 1; /* Gör rutorna perfekt fyrkantiga */
+  border: 1px solid #1e1e24;
+  background-color: transparent;
+}
+
+/* --- Dagskorten --- */
+.calendar-cards-container {
+  padding: 0 16px 100px 16px; /* Extra padding i botten så korten inte fastnar under knappen */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Tätt mellanrum enligt skiss */
+  overflow-y: auto;
+}
+
+/* --- Sticky Bottenknapp --- */
+.sticky-month-btn {
+  position: fixed;
+  bottom: 100px; /* Justera denna så den ligger lagom högt ovanför din navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e1e24; /* Mörksvart */
+  color: #ffffff;
+  border: none;
+  padding: 12px 36px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 1px;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}

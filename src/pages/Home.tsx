@@ -4,7 +4,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import DishCard from '../components/DishCard';
-import { useDishContext } from '../context/DishContext'; // Din egna globala hook!
+import { useDishContext } from '../context/useDishContext';
 import '../styles/home.css'; // Samma CSS som jag skickade tidigare för knapparna
 
 export default function Home() {
@@ -16,22 +16,21 @@ export default function Home() {
 
   return (
     <div className="home-container">
-      <h2>Idag</h2>
+      <h2>Ät detta idag</h2>
       
       {/* 3. Vi skickar in den globalt valda rätten */}
-      <DishCard dish={currentDish} />
-
-      {/* 4. Våra action-knappar under kortet */}
+      <DishCard dish={currentDish} variant="hero">
       <div className="home-actions">
-        {/* Anropar randomizeDish från din Context */}
         <button className="action-button secondary" onClick={randomizeDish}>
-          🎲 Ge mig något annat
+          fel rätt
         </button>
-        
+
         <button className="action-button primary" onClick={() => navigate('/kalender')}>
-          📅 Visa morgondagen
+          imorgon
         </button>
       </div>
+      </DishCard>
     </div>
+  
   );
 }

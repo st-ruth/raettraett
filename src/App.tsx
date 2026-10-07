@@ -5,7 +5,7 @@ import Randomizer from './pages/Randomizer';
 import Calendar from './pages/Calendar';
 import Saved from './pages/Saved';
 
-import {DishProvider} from './context/DishContext';
+import { DishProvider } from './context/DishProvider';
 
 export default function App() {
   return (
