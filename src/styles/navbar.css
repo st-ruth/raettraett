@@ -3,16 +3,16 @@
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0;
-  background-color: #1e1e24; /* Mörk bakgrund så den smälter in snyggt */
+  bottom: 0; /* Mörk bakgrund så den smälter in snyggt */
   box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* Skugga uppåt */
-  z-index: 100; /* Ser till att den alltid ligger överst (framför korten) */
+  background-color: var(--color-ui);
+  z-index: 100; 
 }
 
 /* Själva nav-elementet som lägger ikonerna på rad */
 .navbar {
   display: flex;
-  justify-content: space-evenly;
+  justify-content: space-around;
   padding: 12px 0;
 }
 
@@ -20,13 +20,12 @@
 .nav-item {
   background: none;
   border: none;
-  color: #888890; /* Inaktiv färg (mörkgrå) */
+  color: var(--color-inactive);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px; /* Mellanrum mellan ikon och text */
   cursor: pointer;
-  font-size: 0.75rem; /* Liten text under ikonen */
 }
 
 /* Storleken på själva ikonen */
@@ -38,5 +37,5 @@
 /* VG-touch: Hover-effekt och färg för den vy man är inne på (aktiv) */
 .nav-item:hover,
 .nav-item.active {
-  color: #d4a359; /* Din varma terrakotta/brandgula accentfärg */
+  color: var(--color-active);
 }

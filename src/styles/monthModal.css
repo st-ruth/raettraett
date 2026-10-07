@@ -1,0 +1,92 @@
+/* Själva den mörka bakgrunden som täcker appen */
+.month-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end; /* Trycker ner modalen i botten */
+  z-index: 1000;
+}
+
+/* Den vita "kort"-ytan som fälls upp[cite: 3] */
+.month-modal-content {
+  background-color: #fdfdfd;
+  width: 100%;
+  height: 80vh; /* Tar upp 80% av skärmen */
+  border-radius: 20px 20px 0 0;
+  padding: 24px 16px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+}
+
+.month-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.month-modal-header h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: #1e1e24;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  color: #888890;
+  cursor: pointer;
+  padding: 4px;
+}
+
+/* Rutnätet: 7 lika stora kolumner[cite: 3] */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+
+.grid-header-cell {
+  text-align: center;
+  font-weight: 600;
+  color: #888890;
+  font-size: 0.85rem;
+  margin-bottom: 8px;
+}
+
+.grid-cell {
+  aspect-ratio: 1; /* Gör rutorna fyrkantiga */
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  position: relative;
+}
+
+.grid-cell.past-day {
+  opacity: 0.4; /* Gör tidigare dagar svaga/gråa[cite: 3] */
+  background-color: #e4e4e4;
+}
+
+.grid-cell.today {
+  background-color: #ffe8c3; /* Markeringsfärg för dagens datum */
+  border: 1px solid #d4a359;
+}
+
+.date-number {
+  font-weight: 500;
+  color: #1e1e24;
+}
+
+.cell-emoji {
+  margin-top: auto;
+  font-size: 1rem;
+}
