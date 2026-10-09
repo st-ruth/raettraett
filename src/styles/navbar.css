@@ -39,3 +39,46 @@
 .nav-item.active {
   color: var(--color-active);
 }
+
+.nav-label {
+  display: none;
+}
+
+@media (min-width: 768px) {
+  .navbar-container {
+    position: static;
+    flex: 1;
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  .navbar {
+    justify-content: center;
+    gap: 40px;
+    padding: 12px 0;
+  }
+
+  .nav-icon {
+    display: none;
+  }
+
+  .nav-label {
+    display: block;
+    font-size: 1rem;
+    font-weight: var(--font-weight-bold);
+    text-transform: uppercase;
+    color: var(--color-header);
+    margin-top: 0;
+  }
+  .nav-item {
+    flex-direction: row;
+    color: var(--color-header);
+    text-decoration: none;
+  }
+
+  .nav-item.active {
+    text-decoration: underline;
+    color: var(--color-ui);
+    text-underline-offset: 5px;
+  }
+}

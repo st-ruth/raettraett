@@ -1,0 +1,171 @@
+.calendar-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+}
+
+/* --- Top Strip (Matsedel + Rutor) --- */
+.calendar-top-strip {
+  padding: 16px;
+  background-color: var(--color-ui-transparent);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.strip-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 12px;
+}
+
+.strip-arrow {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.strip-boxes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.strip-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  aspect-ratio: 1; /* Håller dem fyrkantiga */
+  background-color: var(--color-ui);
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+/* Den aktiva/valda dagen får en tydligare mörk ram */
+.strip-box.active {
+  border: 2px solid #111;
+  background-color: var(--color-inactive);
+}
+
+/* Bokstaven för veckodagen */
+.day-letter {
+  font-size: 0.75rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: auto;
+}
+
+/* Om dagen är det faktiska datumet "idag", fyll cirkeln */
+.day-letter.is-today {
+  background-color: #111;
+  color: #fff;
+}
+
+/* Den pyttelilla texten för maträtten i strippen */
+.strip-dish-title {
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Tillåter max 2 rader text */
+  -webkit-box-orient: vertical;
+}
+
+.text-muted {
+  color: #888;
+}
+
+/* CSS för den lilla texten i 7-dagarsstrippen */
+.dish-card-strip {
+  font-size: 0.5rem;
+  text-transform: uppercase;
+  text-align: center;
+  line-height: 1.1;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Tillåter max 2 rader text innan den klipper med ... */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: #111;
+}
+
+/* --- Dagskorten --- */
+.calendar-cards-container {
+  padding: 0 16px 100px 16px; /* Extra padding i botten så korten inte fastnar under knappen */
+  display: flex;
+  flex-direction: column;
+  gap: 0.5px; /* Tätt mellanrum enligt skiss */
+  overflow-y: auto;
+}
+
+/* --- Sticky Bottenknapp --- */
+.sticky-month-btn {
+  position: fixed;
+  bottom: 50px; /* Justera denna så den ligger lagom högt ovanför din navbar */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e1e24; /* Mörksvart */
+  color: #ffffff;
+  border: none;
+  padding: 12px 180px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  z-index: 20;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Desktop-justeringar (Tablets och datorer) */
+@media (min-width: 768px) {
+  .sticky-month-btn {
+    bottom: 16px;
+  }
+
+  .dish-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .calendar-cards-container {
+    width: 100%;
+    max-width: 1100px;
+    margin-inline: auto;
+    box-sizing: border-box;
+    padding-inline: 24px;
+  }
+
+  .calendar-cards-container > .dish-card {
+    max-width: none;
+  }
+
+
+.dish-card-strip {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  font-size: 1rem; 
+  font-weight: 400;
+  text-transform: uppercase;
+  line-height: 1.3;
+  text-align: center;
+  overflow: hidden;
+}
+}

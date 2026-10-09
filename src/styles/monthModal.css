@@ -1,92 +1,102 @@
-/* Själva den mörka bakgrunden som täcker appen */
+/* Den mörka overlayen bakom modalen */
 .month-modal-overlay {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
-  align-items: flex-end; /* Trycker ner modalen i botten */
+  align-items: flex-end;
   z-index: 1000;
 }
 
-/* Den vita "kort"-ytan som fälls upp[cite: 3] */
+/* Själva modalen får nu din snygga fotobakgrund */
 .month-modal-content {
-  background-color: #fdfdfd;
+  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.8)), 
+              url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=500&auto=format&fit=crop') center/cover;
   width: 100%;
-  height: 80vh; /* Tar upp 80% av skärmen */
+  height: 85vh; 
   border-radius: 20px 20px 0 0;
-  padding: 24px 16px;
-  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  padding: 16px 8px; /* Lite smalare padding på sidorna för att maxa rutnätet */
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
+  color: #ffffff; /* All text vit */
 }
 
+/* Header-sektionen enligt din skiss */
 .month-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 24px;
+  padding: 0 8px;
 }
 
 .month-modal-header h2 {
   margin: 0;
-  font-size: 1.4rem;
-  color: #1e1e24;
+  font-size: 1.1rem;
+  letter-spacing: 1px;
 }
 
 .close-btn {
   background: none;
   border: none;
-  color: #888890;
+  color: #ffffff;
   cursor: pointer;
   padding: 4px;
 }
 
-/* Rutnätet: 7 lika stora kolumner[cite: 3] */
+/* Rutnätet */
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
+  /* Tar bort gap för att få linjerna att sitta ihop som i din skiss */
+  gap: 0; 
+  border-top: 1px solid rgba(255, 255, 255, 0.3);
+  border-left: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 .grid-header-cell {
   text-align: center;
-  font-weight: 600;
-  color: #888890;
-  font-size: 0.85rem;
-  margin-bottom: 8px;
+  font-size: 0.8rem;
+  padding-bottom: 8px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
+/* Cellerna ser ut som "mini-dish-cards" fast genomskinliga */
 .grid-cell {
-  aspect-ratio: 1; /* Gör rutorna fyrkantiga */
-  background-color: #f0f0f0;
-  border-radius: 8px;
+  aspect-ratio: 1; /* Håller dem fyrkantiga */
+  background-color: transparent;
+  border-right: 1px solid rgba(255, 255, 255, 0.3);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
   padding: 4px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   cursor: pointer;
-  font-size: 0.8rem;
   position: relative;
+  overflow: hidden;
 }
 
 .grid-cell.past-day {
-  opacity: 0.4; /* Gör tidigare dagar svaga/gråa[cite: 3] */
-  background-color: #e4e4e4;
+  background-color: rgba(0, 0, 0, 0.4); /* Mörkar ner passerade dagar */
 }
 
+/* Visar dagens datum lite starkare */
 .grid-cell.today {
-  background-color: #ffe8c3; /* Markeringsfärg för dagens datum */
-  border: 1px solid #d4a359;
+  background-color: rgba(212, 163, 89, 0.2); 
 }
 
+/* Datum-siffran */
 .date-number {
-  font-weight: 500;
-  color: #1e1e24;
+  font-size: 0.7rem;
+  opacity: 0.8;
 }
 
-.cell-emoji {
+/* Maträttens titel i rutan (t.ex. "FLÄSKPANNKAKA") */
+.cell-dish-title {
+  font-size: 0.55rem; /* Mycket liten text för att få plats i rutan */
+  text-transform: uppercase;
+  text-align: center;
   margin-top: auto;
-  font-size: 1rem;
+  margin-bottom: auto;
+  line-height: 1.1;
+  word-break: break-word; /* Tillåter radbrytning på långa ord */
 }

@@ -1,6 +1,7 @@
 import { Smile, Meh, Angry } from 'lucide-react';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
+import '../styles/actionButtons.css';
 import '../styles/randomizer.css'; 
 
 export default function Randomizer() {

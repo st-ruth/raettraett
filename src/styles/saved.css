@@ -1,0 +1,189 @@
+/* Container för hela sidan */
+.saved-page {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+  height: 100%;
+}
+
+/* --- Sök och Filter --- */
+.saved-header {
+  margin-bottom: 24px;
+}
+
+.search-filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--color-ui);
+  background-color: #ffffff;
+  color: var(--color-ui);
+  font-size: 1rem;
+}
+
+.search-input::placeholder {
+  color: var(--color-ui);
+  opacity: 0.7;
+}
+
+.add-dish-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  border: 1px solid var(--color-ui);
+  border-radius: 8px;
+  background-color: var(--color-ui);
+  color: var(--color-active);
+  cursor: pointer;
+}
+
+.filter-toggle-btn {
+  background-color: var(--color-ui-transparent);
+  border: 1px solid var(--color-ui);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+}
+
+.filter-toggle-btn:hover {
+  background-color: var(--color-ui);
+  color: #ffffff;
+}
+
+.filter-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+/* Dropdown för sortering/filtrering */
+.filter-dropdown {
+  background-color: var(--color-ui-transparent);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.filter-dropdown span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: inherit;
+  margin: 0 4px;
+}
+
+/* --- Flikar (Tabs) --- */
+.saved-tabs {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tab-btn {
+  background: none;
+  border: none;
+  color: #888890;
+  font-size: 0.95rem;
+  padding: 12px 0;
+  flex: 1;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.tab-btn.active {
+  color: #ffffff;
+  border-bottom: 2px solid #d4a359; /* Accentfärg för aktiv flik */
+}
+
+/* --- Listan och Korten --- */
+.saved-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5px;
+  overflow-y: auto; /* Gör listan scrollbar */
+  padding-bottom: 100px; /* Så sista kortet inte döljs bakom navbaren */
+}
+
+.empty-state {
+  text-align: center;
+  color: #888890;
+  margin-top: 32px;
+}
+
+/* --- Dynamiska Knappar (Children i DishCard) --- */
+.compact-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.saved-list .dish-card-actions {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  transform: translateY(-50%);
+}
+
+.action-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.action-icon:hover {
+  opacity: 1;
+}
+
+.action-icon:active {
+  transform: scale(0.9);
+}
+
+/* Färger för plus och kryss enligt skissen */
+.action-icon.add {
+  color: #4CAF50; /* Grönt plus */
+}
+
+.action-icon.remove {
+  color: #F44336; /* Rött kryss */
+}
+
+@media (min-width: 768px) {
+  .saved-header,
+  .saved-list {
+    width: 100%;
+    max-width: 1100px;
+    margin-inline: auto;
+    box-sizing: border-box;
+    padding-inline: 24px;
+  }
+
+  .saved-list > .dish-card {
+    max-width: none;
+  }
+}

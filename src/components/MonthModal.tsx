@@ -2,27 +2,26 @@
 
 import { X } from 'lucide-react';
 import '../styles/monthModal.css';
+import { mockMealPlan } from '../data/dummyData'; // 1. Hämta matsedeln härifrån!
 
 interface MonthModalProps {
   onClose: () => void;
 }
 
 export default function MonthModal({ onClose }: MonthModalProps) {
-  // För tillfället hårdkodar vi dagens datum för att testa layouten
   const today = new Date();
   
-  // Genererar en array med 35 dagar (5 veckor) för rutnätet
+  // Enkel formateringshjälp
+  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
   const generateDays = () => {
     const days = [];
-    // Skapa en kopia av dagens datum för att manipulera
     const startDate = new Date(today);
     
-    // Backa till senaste måndagen (veckans första dag)
-    const dayOfWeek = startDate.getDay(); // 0 = Söndag, 1 = Måndag...
+    const dayOfWeek = startDate.getDay(); 
     const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     startDate.setDate(startDate.getDate() + diffToMonday);
 
-    // Generera 35 dagar framåt (5 rader * 7 kolumner)[cite: 3]
     for (let i = 0; i < 35; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
@@ -38,40 +37,69 @@ export default function MonthModal({ onClose }: MonthModalProps) {
     <div className="month-modal-overlay">
       <div className="month-modal-content">
         
+        {/* Uppdaterad header som matchar din skiss */}
         <div className="month-modal-header">
-          <h2>Rullande Matsedel</h2>
           <button className="close-btn" onClick={onClose} aria-label="Stäng">
             <X size={24} />
           </button>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <span style={{ cursor: 'pointer' }}>&lt;</span>
+            <h2>v.39-v43</h2>
+            <span style={{ cursor: 'pointer' }}>&gt;</span>
+          </div>
+
+          <span title="Låst matsedel" style={{ cursor: 'pointer' }}>🔒</span>
         </div>
 
-        {/* Kalenderns rutnät */}
         <div className="calendar-grid">
-          {/* Veckodagarna i toppen */}
           {weekDays.map((day, i) => (
             <div key={`header-${i}`} className="grid-header-cell">
               {day}
             </div>
           ))}
 
-          {/* Själva datumrutorna */}
           {calendarDays.map((date, i) => {
-            // Kontrollera om dagen har passerat (för att göra den grå)[cite: 3]
             const isPast = date < new Date(today.setHours(0, 0, 0, 0));
             const isToday = date.toDateString() === new Date().toDateString();
+            const currentDateString = formatDate(date);
+            const plannedDay = mockMealPlan.find(plan => plan.date === currentDateString);
 
             return (
               <div 
                 key={i} 
                 className={`grid-cell ${isPast ? 'past-day' : ''} ${isToday ? 'today' : ''}`}
-                onClick={() => console.log(`Du klickade på ${date.toLocaleDateString()}`)}
               >
+                {/* Litet datum uppe i vänstra hörnet */}
                 <span className="date-number">{date.getDate()}</span>
-                {/* Här kan vi senare lägga in lås-ikon eller emojis om dagen har ett recept[cite: 3] */}
-                {!isPast && i % 4 === 0 && <span className="cell-emoji">🍝</span>} {/* Dummy-data för test */}
+                
+                {/* Rendera ut texten (som i din skiss) istället för emoji */}
+                {!isPast && plannedDay && (
+                  <>
+                    {plannedDay.status === 'eating_out' ? (
+                      <span className="cell-dish-title" style={{ color: '#aaa' }}>BORTA</span>
+                    ) : (
+                      <span className="cell-dish-title">
+                        {plannedDay.recipes[0]?.title}
+                      </span>
+                    )}
+
+                    {/* Nålen/Låset om rätten är låst */}
+                    {plannedDay.status === 'locked' && (
+                      <span style={{ fontSize: '0.6rem', position: 'absolute', top: '2px', right: '2px' }}>📌</span>
+                    )}
+                  </>
+                )}
               </div>
             );
           })}
+        </div>
+        
+        {/* Den svarta bottenknappen från din skiss */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
+            <button style={{ backgroundColor: '#111', color: '#fff', border: 'none', padding: '12px 32px', borderRadius: '4px', letterSpacing: '1px' }}>
+                SLUMPA NY
+            </button>
         </div>
 
       </div>

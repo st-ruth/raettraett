@@ -16,11 +16,6 @@
   margin-bottom: 8px;
 }
 
-.randomizer-header p {
-  font-size: 0.95rem;
-  color: #666;
-  margin: 0;
-}
 
 .randomizer-actions {
   display: flex;
@@ -29,34 +24,4 @@
   margin-top: 24px;
   width: 100%;
   max-width: 350px;
-}
-
-.action-btn {
-  flex: 1; /* Gör att alla knappar blir lika breda */
-  padding: 12px 8px;
-  border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: transform 0.1s ease, filter 0.2s ease;
-}
-
-.action-btn:active {
-  transform: scale(0.95); /* Skönt klick-motstånd */
-}
-
-.action-btn.yes {
-  background-color: #d4a359; /* Din terrakotta/brandgula */
-  color: white;
-}
-
-.action-btn.maybe {
-  background-color: #f0f0f0;
-  color: #1e1e24;
-}
-
-.action-btn.no {
-  background-color: #33333d; /* Mörkgrå för komposten */
-  color: white;
 }

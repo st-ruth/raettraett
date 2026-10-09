@@ -5,7 +5,8 @@
 import { useNavigate } from 'react-router-dom';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext';
-import '../styles/home.css'; // Samma CSS som jag skickade tidigare för knapparna
+import '../styles/actionButtons.css';
+import '../styles/randomizer.css';
 
 export default function Home() {
   // 1. Hämta datan och funktionen från ditt globala state
@@ -15,20 +16,22 @@ export default function Home() {
   const navigate = useNavigate();
 
   return (
-    <div className="home-container">
-      <h2>Ät detta idag</h2>
+    <div className="randomizer-container">
+      <div className="randomizer-header">
+        <h2>Ät detta idag</h2>
+      </div>
       
       {/* 3. Vi skickar in den globalt valda rätten */}
       <DishCard dish={currentDish} variant="hero">
-      <div className="home-actions">
-        <button className="action-button secondary" onClick={randomizeDish}>
-          fel rätt
-        </button>
+        <div className="randomizer-actions">
+          <button className="action-btn" onClick={randomizeDish}>
+            fel rätt
+          </button>
 
-        <button className="action-button primary" onClick={() => navigate('/kalender')}>
-          imorgon
-        </button>
-      </div>
+          <button className="action-btn" onClick={() => navigate('/kalender')}>
+            imorgon
+          </button>
+        </div>
       </DishCard>
     </div>
   

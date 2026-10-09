@@ -1,0 +1,20 @@
+.action-btn {
+  flex: 1;
+  padding: 12px 8px;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: transform 0.1s ease, filter 0.2s ease;
+  background-color: var(--color-inactive);
+  color: var(--color-ui);
+}
+
+.action-btn:active {
+  transform: scale(0.95);
+  color: var(--color-active);
+}
+
+.action-btn:hover {
+  background-color: var(--color-active);
+}
