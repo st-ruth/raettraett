@@ -1,16 +1,18 @@
 // Logga och menysymbol. Alltid synliga.
 
-import { Menu } from 'lucide-react';
+import { Moon } from 'lucide-react';
+import Navbar from './Navbar';
 import '../styles/header.css';
 
 export default function Header() {
   return (
     <header className="header-container">
       <div className="header-left">
-        <h2>rättRätt</h2>
+        <p>rättRätt</p>
       </div>
-      <button className="menu-button" aria-label="Meny">
-        <Menu className="header-icon" />
+      <Navbar />
+      <button className="mode-button" aria-label="Byt läge" title="Byt till mörkt läge">
+        <Moon className="mode-icon" />
       </button>
     </header>
   );

@@ -4,18 +4,35 @@
 --font-family: 'Outfit', sans-serif;
 --font-weight-thin: 100;
 --font-weight-light: 200;
+--font-weight-bold: 500;
 
 
 /*COLORS*/
 --color-ui: rgb(176, 117, 102); 
 --color-ui-transparent: rgba(176, 117, 102, 0.586);
 
+--color-header: rgb(137, 69, 52);
+
 --color-active: rgb(249, 241, 240);
 --color-inactive: rgb(233, 200, 198);
-
 }
 
-/*styleing för body (statisk bakgrund)*/
+/*Mörkt läge*/
+[data-theme="dark"] {
+background-image: url("../assets/background_dark.png");
+
+--color-ui:rgb(39, 14, 11);
+--color-ui-transparent: rgba(39, 14, 11, 0.586);
+--color-header:rgb(197, 120, 11);
+
+--color-active: rgb(142, 87, 85);
+--color-inactive: rgb(128, 78, 77);
+}
+
+
+* {
+    font-weight: var(--font-weight-thin);
+}
 
 body {
     font-family: var(--font-family);

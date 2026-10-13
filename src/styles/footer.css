@@ -1,0 +1,13 @@
+.footer {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid var(--color-ui);
+    color: var(--color-ui);
+    }
+}

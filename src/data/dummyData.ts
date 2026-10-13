@@ -1,4 +1,5 @@
-import type {Dish} from '../types/dish'
+import type {Dish} from '../types/dish';
+import type { MealPlanDay } from '../types/mealPlan'; 
 
 export const dummyDishes: Dish[] = [
     {
@@ -6,17 +7,16 @@ export const dummyDishes: Dish[] = [
         title: 'korvstroganoff',
         status: 'repo', 
         category: 'Husman',
-        mealType: 'weekday',
+        preferredDays: 'weekdays',
         proteinType: 'sausage',
         carbType: 'rice', 
-        preferredDays: ['tuesday','wednesday'],
     },
     {
         id: '2',
         title: 'Tacos',
         status: 'repo',
         category: 'Mexikanskt',
-        mealType: 'both',
+        preferredDays: 'both',
         proteinType: 'mince',
         carbType: 'other',
         isQuick: true,
@@ -26,10 +26,9 @@ export const dummyDishes: Dish[] = [
         title: 'högrevsgryta',
         status: 'repo', 
         category: 'Husman',
-        mealType: 'weekend',
+        preferredDays: 'weekends',
         proteinType: 'stew',
         carbType: 'potatoes',
-        preferredDays: ['sunday'],  
         isSlowCooked: true
     }, 
     {
@@ -37,7 +36,7 @@ export const dummyDishes: Dish[] = [
         title: 'köttfärssås',
         status:'blocked',
         category: 'Husman',
-        mealType: 'both',
+        preferredDays: 'both',
         proteinType: 'mince',
         carbType: 'pasta',
         isQuick: true
@@ -47,10 +46,49 @@ export const dummyDishes: Dish[] = [
         title: 'korensk pulled tacos',
         status: 'maybe',
         category: 'Asiatiskt',
-        mealType: 'weekend',
+        preferredDays: 'weekends',
         proteinType: 'pulled',
         carbType: 'bread',
-        preferredDays: ['friday', 'saturday'],
         isSlowCooked: true
     }
 ]
+
+//------------------------------------------------------//
+
+const today = new Date();
+const tomorrow = new Date(today);
+tomorrow.setDate(today.getDate() + 1);
+
+const inThreeDays = new Date(today);
+inThreeDays.setDate(today.getDate() + 3);
+
+const inFiveDays = new Date(today);
+inFiveDays.setDate(today.getDate() + 5);
+
+const formatDate = (d: Date) => d.toISOString().split('T')[0];
+
+// Exportera din fejkade matsedel
+export const mockMealPlan: MealPlanDay[] = [
+  {
+    id: 'day-1',
+    date: formatDate(tomorrow), // Imorgon
+    dayOfWeek: 'Okänd', 
+    status: 'generated',
+    recipes: [dummyDishes[0]],  // Korvstroganoff
+  },
+  {
+    id: 'day-2',
+    date: formatDate(inThreeDays), // Om 3 dagar
+    dayOfWeek: 'Okänd',
+    status: 'locked',
+    recipes: [dummyDishes[1]],  // Tacos
+  },
+  {
+    id: 'day-3',
+    date: formatDate(inFiveDays), // Om 5 dagar
+    dayOfWeek: 'Okänd',
+    status: 'eating_out',
+    recipes: [],
+    customNote: 'Middag hos vänner',
+  }
+];
