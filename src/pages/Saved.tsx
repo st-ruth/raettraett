@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
-import { dummyDishes } from '../data/dummyData';
+// 1. Vi importerar nu din globala hook istället för dummyData!
+import { useDishContext } from '../context/useDishContext'; 
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock, Hourglass } from 'lucide-react';
 import '../styles/saved.css';
 
@@ -13,12 +14,17 @@ export default function Saved() {
   const [showFilters, setShowFilters] = useState(false);
   const [isDishFormModalOpen, setIsDishFormModalOpen] = useState(false);
 
-  // Filtrerar fram rätterna baserat på vald flik och sökord
-  // (Här antar vi att dina rätter har en status-prop. Justera efter din datastruktur)
-  const filteredDishes = dummyDishes.filter(dish => {
-    // För testning just nu, vi mappar om statusen lite om den saknas i dummyData
-    const matchesTab = dish.status === activeTab || (activeTab === 'yes' && dish.status === 'repo'); 
+  // 2. Hämta alla rätter OCH funktionen för att flytta dem från Context
+  const { dishes, updateDishStatus } = useDishContext();
+
+ // Filtrerar fram rätterna baserat på vald flik och sökord
+  const filteredDishes = dishes.filter(dish => {
+    // 1. Nu kollar vi BARA efter exakt matchning. 'repo' (slump-banken) visas inte här längre!
+    const matchesTab = dish.status === activeTab; 
+    
+    // 2. Sökfunktionen fungerar precis som innan
     const matchesSearch = dish.title.toLowerCase().includes(searchQuery.toLowerCase());
+    
     return matchesTab && matchesSearch;
   });
 
@@ -93,22 +99,30 @@ export default function Saved() {
         </div>
       </div>
 
-      {/* Listan med rätter (Förberedd för framtida Drag & Drop) */}
+      {/* Listan med rätter */}
       <div className="saved-list">
         {filteredDishes.length > 0 ? (
           filteredDishes.map(dish => (
             <DishCard key={dish.id} dish={dish} variant="calendar">
               
-              {/* Children: Dynamiska knappar som hamnar längst till höger i kortet */}
               <div className="compact-actions">
                 {activeTab === 'maybe' && (
-                  <button className="action-icon add" aria-label="Flytta till Ja-listan">
+                  <button 
+                    className="action-icon add" 
+                    aria-label="Flytta till Ja-listan"
+                    // 4. Klickar man på Plus skickas rätten till Ja-listan ('yes')
+                    onClick={() => updateDishStatus(dish.id, 'yes')}
+                  >
                     <Plus size={20} />
                   </button>
                 )}
                 
-                {/* Krysset finns på alla listor */}
-                <button className="action-icon remove" aria-label="Ta bort">
+                {/* 5. Klickar man på Kryss återställs rätten till 'repo' (så den rensas från listan) */}
+                <button 
+                  className="action-icon remove" 
+                  aria-label="Ta bort"
+                  onClick={() => updateDishStatus(dish.id, 'repo')}
+                >
                   <X size={20} />
                 </button>
               </div>

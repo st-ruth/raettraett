@@ -1,3 +1,5 @@
+//Hook
+
 import { useContext } from 'react';
 import { DishContext } from './DishContext';
 
