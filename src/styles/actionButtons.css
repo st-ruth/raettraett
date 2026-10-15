@@ -14,7 +14,7 @@
 
 .action-btn:active {
   transform: scale(0.95);
-  color: var(--color-active);
+  color: var(--color-ui);
 }
 
 .action-btn:hover {

@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { LockKeyhole, X, MessageSquareMore } from 'lucide-react';
 import '../styles/modal.css';
 import EditDayModal from '../components/EditDayModal';
 import { useDishContext } from '../context/useDishContext';
 import type { MealPlanDay } from '../types/mealPlan';
+import { useAccessibleModal } from '../hooks/useAccessibleModal';
 
 interface MonthModalProps {
   onClose: () => void;
@@ -11,6 +12,8 @@ interface MonthModalProps {
 
 export default function MonthModal({ onClose }: MonthModalProps) {
   const today = new Date();
+  const titleId = useId();
+  const dialogRef = useAccessibleModal(true, onClose);
 
   const { mealPlan, updateMealPlanDay, randomizeMealPlan } = useDishContext(); 
 
@@ -56,27 +59,38 @@ export default function MonthModal({ onClose }: MonthModalProps) {
 
   return (
     <div className="month-modal-overlay">
-      <div className="month-modal-content">
+      <div
+        ref={dialogRef}
+        className="month-modal-content"
+        role={selectedDate ? undefined : 'dialog'}
+        aria-modal={selectedDate ? undefined : true}
+        aria-hidden={Boolean(selectedDate)}
+        inert={Boolean(selectedDate)}
+        aria-labelledby={titleId}
+        data-a11y-dialog="true"
+        tabIndex={-1}
+      >
 
         {/* Header */}
         <div className="month-modal-header">
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <span style={{ cursor: 'pointer' }}>&lt;</span>
-            <h2>v.39-v43</h2>
+          <div className="month-modal-heading">
+            <span aria-hidden="true">&lt;</span>
+            <h2 id={titleId}>v.39-v43</h2>
           </div>
 
           <button
+            type="button"
             className="close-btn"
             onClick={onClose}
             aria-label="Stäng"
           >
-            <X size={24} />
+            <X size={24} aria-hidden="true" />
           </button>
         </div>
 
         <div className="calendar-grid">
           {weekDays.map((day, i) => (
-            <div key={`header-${i}`} className="grid-header-cell">
+            <div key={`header-${i}`} className="grid-header-cell" aria-hidden="true">
               {day}
             </div>
           ))}
@@ -93,20 +107,25 @@ export default function MonthModal({ onClose }: MonthModalProps) {
             );
 
             return (
-              <div
+              <button
+                type="button"
                 key={i}
                 className={`grid-cell ${isPast ? 'past-day' : ''} ${isToday ? 'today' : ''}`}
                 onClick={() => setSelectedDate(date)}
-                style={{ cursor: 'pointer', position: 'relative' }}
+                aria-label={`${date.toLocaleDateString('sv-SE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}${plannedDay?.recipes.length ? `: ${plannedDay.recipes.map(recipe => recipe.title).join(', ')}` : ''}${plannedDay?.status === 'eating_out' ? ': äter borta' : ''}${(!plannedDay || (!plannedDay.recipes.length && plannedDay.status !== 'eating_out' && !plannedDay.customNote)) ? ': ingen planerad måltid' : ''}${plannedDay?.status === 'locked' ? ', låst dag' : ''}${plannedDay?.customNote ? `, personlig notis: ${plannedDay.customNote}` : ''}. Öppna planeringen för dagen.`}
               >
                 {/* Datum */}
                 <span className="date-number">{date.getDate()}</span>
 
                 {/* Visa dagens planerade mat */}
-                {!isPast && plannedDay && (
+                {plannedDay && (
                   <>
                     {plannedDay.status === 'eating_out' ? (
-                      <span className="cell-dish-title cell-day-status" style={{ color: '#aaa' }}>
+                      <span className="cell-dish-title cell-day-status">
                         BORTA
                       </span>
                     ) : plannedDay.recipes.length > 0 ? (
@@ -127,7 +146,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                         </span>
                       </>
                     ) : plannedDay.customNote ? (
-                      <span className="cell-dish-title cell-day-status" style={{ color: '#aaa' }}>
+                      <span className="cell-dish-title cell-day-status">
                         {/* Visa bara en ikon om det inte finns mat men en notering */}
                         <MessageSquareMore size={16} />
                       </span>
@@ -136,55 +155,33 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                     {/* Låsmarkering uppe i hörnet */}
                     {plannedDay.status === 'locked' && (
                       <span
-                        style={{
-                          fontSize: '0.6rem',
-                          position: 'absolute',
-                          top: '2px',
-                          right: '2px',
-                        }}
+                        className="month-cell-lock"
                       >
-                        <LockKeyhole size={12} aria-label="Låst" />
+                        <LockKeyhole size={12} aria-hidden="true" />
                       </span>
                     )}
 
                     {/* Kommentar-ikon nere i hörnet (om det finns både mat och kommentar) */}
                     {plannedDay.customNote && plannedDay.recipes.length > 0 && (
                       <span
-                        style={{
-                          position: 'absolute',
-                          bottom: '2px',
-                          right: '4px',
-                        }}
+                        className="month-cell-note"
                       >
-                        <MessageSquareMore size={12} />
+                        <MessageSquareMore size={12} aria-hidden="true" />
                       </span>
                     )}
                   </>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>
 
         {/* Bottenknapp */}
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            marginTop: '24px',
-          }}
-        >
+        <div className="month-modal-actions">
           <button
+            type="button"
+            className="month-randomize-btn"
             onClick={randomizeMealPlan}
-            style={{
-              backgroundColor: '#111',
-              color: '#fff',
-              border: 'none',
-              padding: '12px 32px',
-              borderRadius: '4px',
-              letterSpacing: '1px',
-              cursor: 'pointer'
-            }}
           >
             SLUMPA NY
           </button>

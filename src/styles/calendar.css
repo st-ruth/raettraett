@@ -22,12 +22,21 @@
   margin-bottom: 12px;
 }
 
+.strip-header h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
 .strip-arrow {
   background: none;
   border: none;
   cursor: pointer;
   display: flex;
   align-items: center;
+}
+
+.strip-arrow:focus-visible {
+  outline-offset: 3px;
 }
 
 .strip-boxes {
@@ -37,6 +46,7 @@
 }
 
 .strip-box {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,12 +58,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
   overflow: hidden;
+  font: inherit;
+  color: inherit;
+  text-align: center;
 }
 
-/* Den aktiva/valda dagen får en tydligare mörk ram */
-.strip-box.active {
-  border: 2px solid #111;
-  background-color: var(--color-inactive);
+.strip-box:focus-visible {
+  outline-offset: -3px;
 }
 
 /* Bokstaven för veckodagen */
@@ -71,7 +82,7 @@
 /* Om dagen är det faktiska datumet "idag", fyll cirkeln */
 .day-letter.is-today {
   background-color: #111;
-  color: #fff;
+  color: var(--color-white);
 }
 
 /* Den pyttelilla texten för maträtten i strippen */
@@ -91,20 +102,46 @@
 }
 
 .strip-dish-mobile-name {
-  display: -webkit-box;
-  overflow: hidden;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .strip-dish-title-mobile {
   display: flex;
+  flex: 1 0 auto;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  width: 100%;
   max-width: 100%;
-  color: #ffffff;
+  color: var(--color-white);
   font-size: 0.6rem;
+  line-height: 1.15;
+  text-align: center;
+  white-space: normal;
+  overflow-wrap: anywhere;
   -webkit-line-clamp: unset;
+}
+
+.strip-status-ghost {
+  color: var(--color-white);
+}
+
+.strip-dish-title-mobile .strip-status-ghost {
+  position: static;
+  flex: 0 0 auto;
+  transform: none;
+}
+
+.strip-note-icon {
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  flex: 0 0 auto;
+  color: var(--color-white);
+  transform: translateX(-50%);
 }
 
 .strip-dish-mobile-count {
@@ -112,8 +149,18 @@
   white-space: nowrap;
 }
 
-.text-muted {
-  color: #888;
+@media (max-width: 767px) {
+  .strip-box {
+    aspect-ratio: auto;
+    min-height: 76px;
+    padding: 6px 3px 22px;
+    overflow: visible;
+  }
+
+  .strip-box .day-letter {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+  }
 }
 
 /* CSS för den lilla texten i 7-dagarsstrippen */
@@ -190,8 +237,8 @@
   bottom: 50px; /* Justera denna så den ligger lagom högt ovanför din navbar */
   left: 50%;
   transform: translateX(-50%);
-  background-color: #1e1e24; /* Mörksvart */
-  color: #ffffff;
+  background-color: var(--color-ink); /* Mörksvart */
+  color: var(--color-white);
   border: none;
   padding: 12px 180px;
   border-radius: 6px;
@@ -207,31 +254,29 @@
   border: 2px solid var(--text-color, #111);
   background-color: var(--color-inactive, rgba(255, 255, 255, 0.2)); 
   transform: scale(1.05); /* En liten förstoring för att tydliggöra */
-  transition: all 0.2s ease;
 }
 
-/* Bokstaven för veckodagen (oförändrad från tidigare) */
-.day-letter {
-  font-size: 0.75rem;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  margin-bottom: auto;
+body[data-theme="dark"] .strip-box {
+  color: var(--color-white);
 }
 
-/* Om dagen är det faktiska datumet "idag", fyll cirkeln (oförändrad) */
-.day-letter.is-today {
-  background-color: var(--text-color, #111);
-  color: var(--bg-color, #fff);
+body[data-theme="dark"] .strip-box.scrolled-active {
+  border-color: var(--color-inactive);
+  background-color: var(--color-ui);
+}
+
+body[data-theme="dark"] .strip-arrow {
+  color: var(--color-white);
 }
 
 /* Desktop-justeringar (Tablets och datorer) */
 @media (min-width: 768px) {
   .strip-dish-title-mobile {
     display: none;
+  }
+
+  .strip-note-icon {
+    bottom: 6px;
   }
 
   .strip-box .day-letter {
@@ -247,7 +292,12 @@
     justify-content: center;
     width: 100%;
     min-height: 0;
-    color: #ffffff;
+    color: var(--color-white);
+  }
+
+  .strip-dishes-desktop .strip-status-ghost {
+    position: static;
+    transform: none;
   }
 
   .strip-dishes-desktop .strip-dish-title {

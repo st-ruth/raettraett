@@ -27,7 +27,7 @@
   box-sizing: border-box;
 }
 
-.dish-card h3 {
+.dish-card h2 {
   margin: 0;
   font-size: 1.2rem;
   text-transform: uppercase;
@@ -54,6 +54,11 @@
   opacity: 0.9;
 }
 
+.dish-icon-ghost {
+  color: var(--color-white);
+  opacity: 1;
+}
+
 .dish-card-actions {
   padding: 16px;
   width: 100%;
@@ -68,11 +73,10 @@
 /* 1. Hero (För Home & Randomizer) - Fyller nästan hela skärmen */
 .dish-card.hero {
   height: 60vh; /* Tar upp 60% av skärmhöjden */
-  max-width: 400px;
   margin: 0 auto;
 }
 
-.dish-card.hero h3 {
+.dish-card.hero h2 {
   font-size: 1.8rem; /* Större rubrik på hero-kortet */
 }
 
@@ -80,7 +84,6 @@
 .dish-card.calendar {
   height: 180px; 
   margin: 8px auto;
-  background: var(--color-ui-transparent);
 }
 
 .dish-card.calendar.dish-card-with-recipes {
@@ -116,7 +119,7 @@
   border-top: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-.dish-card-recipe-row h3 {
+.dish-card-recipe-row h2 {
   width: auto;
   max-width: 100%;
 }
@@ -140,6 +143,16 @@
   padding: 12px 16px;
 }
 
-.dish-card.compact h3 {
+.dish-card.compact h2 {
   font-size: 1rem;
+}
+
+[data-theme="dark"] .dish-card {
+  color: var(--color-white);
+}
+
+[data-theme="dark"] .dish-card-date,
+[data-theme="dark"] .dish-card h2,
+[data-theme="dark"] .dish-card .dish-icon {
+  color: var(--color-white);
 }

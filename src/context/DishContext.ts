@@ -13,6 +13,7 @@ export interface DishContextType {
   updateDishStatus: (id: string, newStatus: DishStatus | undefined) => void;
   mealPlan: MealPlanDay[];
   updateMealPlanDay: (updatedDay: MealPlanDay) => void;
+  randomizeMealPlanDay: (date: string) => void;
   randomizeMealPlan: () => void;
 }
 

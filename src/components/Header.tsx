@@ -16,12 +16,15 @@ export default function Header() {
       </div>
       <Navbar />
       <button
+        type="button"
         className="mode-button"
         onClick={toggleTheme}
         aria-label={`Byt till ${nextTheme === 'dark' ? 'mörkt' : 'ljust'} läge`}
         title={`Byt till ${nextTheme === 'dark' ? 'mörkt' : 'ljust'} läge`}
       >
-        {theme === 'dark' ? <Sun className="mode-icon" /> : <Moon className="mode-icon" />}
+        {theme === 'dark'
+          ? <Sun className="mode-icon" aria-hidden="true" />
+          : <Moon className="mode-icon" aria-hidden="true" />}
       </button>
     </header>
   );

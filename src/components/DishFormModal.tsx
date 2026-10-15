@@ -1,8 +1,10 @@
+import { useId } from 'react';
 import { X, Clock, Hourglass } from 'lucide-react';
 import { useDishContext } from '../context/useDishContext';
 import type { CarbType, Dish, PreferredDays, ProteinType } from '../types/dish';
 import '../styles/modal.css';
 import '../styles/dishFormModal.css'; 
+import { useAccessibleModal } from '../hooks/useAccessibleModal';
 
 const preferredDayOptions: readonly PreferredDays[] = ['weekdays', 'weekends', 'both'];
 const proteinOptions: readonly ProteinType[] = [
@@ -25,6 +27,8 @@ interface DishFormModalProps {
 
 export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
   const { addDish } = useDishContext();
+  const titleId = useId();
+  const dialogRef = useAccessibleModal(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -82,12 +86,20 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
+      <div
+        ref={dialogRef}
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-a11y-dialog="true"
+        tabIndex={-1}
+      >
         
         <div className="modal-header">
-          <h2>Skapa ny maträtt</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Stäng">
-            <X size={24} />
+          <h2 id={titleId}>Skapa ny maträtt</h2>
+          <button type="button" className="close-btn" onClick={onClose} aria-label="Stäng">
+            <X size={24} aria-hidden="true" />
           </button>
         </div>
         
@@ -98,8 +110,9 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
           </div>
 
           <div className="form-group">
-            <p className="form-group-label">När passar rätten bäst? *</p>
-            <div className="form-checkboxes preferred-days-options">
+            <fieldset className="radio-group">
+              <legend className="form-group-label">När passar rätten bäst? *</legend>
+              <div className="form-checkboxes preferred-days-options">
               <label className="checkbox-label">
                 <input type="radio" name="preferredDays" value="weekdays" required />
                 <span>Vardagar</span>
@@ -112,7 +125,8 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
                 <input type="radio" name="preferredDays" value="both" />
                 <span>Båda</span>
               </label>
-            </div>
+              </div>
+            </fieldset>
           </div>
 
           <div className="form-group">
@@ -156,7 +170,9 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
             </select>
           </div>
 
-        <div className="form-checkboxes">
+        <fieldset className="radio-group form-group">
+          <legend className="form-group-label">Tillagningstid</legend>
+          <div className="form-checkboxes">
             <label className="checkbox-label">
               {/* Radioknappar med samma 'name' gör att bara en kan väljas */}
               <input type="radio" name="cookingTime" value="quick" />
@@ -168,6 +184,7 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
               <span><Hourglass size={16} aria-hidden="true" /> Långkok / Tar extra tid</span>
             </label>
           </div>
+        </fieldset>
 
           <div className="form-actions">
             <button type="button" className="btn-secondary" onClick={onClose}>Avbryt</button>

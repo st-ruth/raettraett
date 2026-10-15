@@ -67,10 +67,57 @@ inThreeDays.setDate(today.getDate() + 3);
 const inFiveDays = new Date(today);
 inFiveDays.setDate(today.getDate() + 5);
 
-const formatDate = (d: Date) => d.toISOString().split('T')[0];
+const twoDaysAgo = new Date(today);
+twoDaysAgo.setDate(today.getDate() - 2);
+
+const fiveDaysAgo = new Date(today);
+fiveDaysAgo.setDate(today.getDate() - 5);
+
+const nineDaysAgo = new Date(today);
+nineDaysAgo.setDate(today.getDate() - 9);
+
+const twelveDaysAgo = new Date(today);
+twelveDaysAgo.setDate(today.getDate() - 12);
+
+const formatDate = (d: Date) => {
+  const offset = d.getTimezoneOffset() * 60000;
+  return new Date(d.getTime() - offset).toISOString().slice(0, 10);
+};
+
+const formatDayOfWeek = (d: Date) =>
+  d.toLocaleDateString('sv-SE', { weekday: 'long' });
 
 // Exportera din fejkade matsedel
 export const mockMealPlan: MealPlanDay[] = [
+  {
+    id: 'history-day-1',
+    date: formatDate(twelveDaysAgo),
+    dayOfWeek: formatDayOfWeek(twelveDaysAgo),
+    status: 'generated',
+    recipes: [dummyDishes[0]],
+  },
+  {
+    id: 'history-day-2',
+    date: formatDate(nineDaysAgo),
+    dayOfWeek: formatDayOfWeek(nineDaysAgo),
+    status: 'locked',
+    recipes: [dummyDishes[1]],
+    customNote: 'Extra mycket grönsaker',
+  },
+  {
+    id: 'history-day-3',
+    date: formatDate(fiveDaysAgo),
+    dayOfWeek: formatDayOfWeek(fiveDaysAgo),
+    status: 'generated',
+    recipes: [dummyDishes[3]],
+  },
+  {
+    id: 'history-day-4',
+    date: formatDate(twoDaysAgo),
+    dayOfWeek: formatDayOfWeek(twoDaysAgo),
+    status: 'generated',
+    recipes: [dummyDishes[2]],
+  },
   {
     id: 'day-1',
     date: formatDate(tomorrow), // Imorgon

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { X, Trash2, LockKeyhole, Dices, Dice5 } from 'lucide-react'; 
 import '../styles/modal.css';
 import type { MealPlanDay } from '../types/mealPlan';
 import { useDishContext } from '../context/useDishContext';
+import { useAccessibleModal } from '../hooks/useAccessibleModal';
 
 interface EditDayModalProps {
   day: MealPlanDay;
@@ -14,6 +15,8 @@ interface EditDayModalProps {
 export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayModalProps) {
   const { dishes, userDishStatuses } = useDishContext();
   const [currentRecipes, setCurrentRecipes] = useState(day.recipes);
+  const titleId = useId();
+  const dialogRef = useAccessibleModal(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -83,61 +86,69 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
+      <div
+        ref={dialogRef}
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-a11y-dialog="true"
+        tabIndex={-1}
+      >
         <div className="modal-header">
-          <h1>{day.date} | {day.dayOfWeek}</h1>
-          <button className="close-btn" onClick={onClose} aria-label="Stäng">
-            <X size={24} />
+          <h2 id={titleId}>{day.date} | {day.dayOfWeek}</h2>
+          <button type="button" className="close-btn" onClick={onClose} aria-label="Stäng">
+            <X size={24} aria-hidden="true" />
           </button>
         </div>
 
         <form className="edit-day-form" onSubmit={handleSubmit}>
           {/* Dagens rätter */}
           <div className="form-group">
-            <label>Dagens rätter</label>
+            <p className="form-group-label" id="planned-dishes-label">Dagens rätter</p>
 
-            {currentRecipes.length > 0 ? (
-              <div className="planned-dishes">
-                {currentRecipes.map((dish, index) => (
-                  <div className="planned-dish" key={`${dish.id}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ flex: 1 }}>{dish.title}</span>
+            <div role="group" aria-labelledby="planned-dishes-label">
+              {currentRecipes.length > 0 ? (
+                <div className="planned-dishes">
+                  {currentRecipes.map((dish, index) => (
+                    <div className="planned-dish" key={`${dish.id}-${index}`}>
+                      <span className="planned-dish-title">{dish.title}</span>
 
-                    <button
-                      type="button"
-                      className="swap-dish-btn"
-                      onClick={() => handleSwapDish(index)}
-                      aria-label={`Byt ut ${dish.title}`}
-                      title={`Byt ut ${dish.title}`}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffffff', display: 'flex' }}
-                    >
-                      <Dice5 size={18} />
-                    </button>
+                      <button
+                        type="button"
+                        className="swap-dish-btn"
+                        onClick={() => handleSwapDish(index)}
+                        aria-label={`Byt ut ${dish.title}`}
+                        title={`Byt ut ${dish.title}`}
+                      >
+                        <Dice5 size={18} aria-hidden="true" />
+                      </button>
 
-                    <button
-                      type="button"
-                      className="remove-dish-btn"
-                      onClick={() => handleRemoveDish(index)}
-                      aria-label={`Ta bort ${dish.title}`}
-                      title={`Ta bort ${dish.title}`}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
-                    >
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="empty-dishes">Inga rätter planerade ännu.</p>
-            )}
+                      <button
+                        type="button"
+                        className="remove-dish-btn"
+                        onClick={() => handleRemoveDish(index)}
+                        aria-label={`Ta bort ${dish.title}`}
+                        title={`Ta bort ${dish.title}`}
+                      >
+                        <Trash2 size={18} aria-hidden="true" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="empty-dishes">Inga rätter planerade ännu.</p>
+              )}
 
-            <button 
-              type="button" 
-              className="add-dish-btn" 
-              onClick={handleAddRandomDish}
-            >
-              <Dices size={18} />
-              Slumpa in extra rätt
-            </button>
+              <button
+                type="button"
+                className="add-dish-btn"
+                onClick={handleAddRandomDish}
+              >
+                <Dices size={18} aria-hidden="true" />
+                Slumpa in extra rätt
+              </button>
+            </div>
           </div>
 
           {/* Kommentar */}
@@ -156,11 +167,11 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
           {/* Lås dag */}
           <div className="edit-day-lock">
             <div className="edit-day-lock-label">
-              <LockKeyhole size={20} />
+              <LockKeyhole size={20} aria-hidden="true" />
 
               <div>
-                <span>Lås denna dag</span>
-                <small>
+                <span id="lock-day-label">Lås denna dag</span>
+                <small id="lock-day-description">
                   En låst dag ska inte ändras när du slumpar fram nya rätter.
                 </small>
               </div>
@@ -170,7 +181,8 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
               type="checkbox"
               name="isLocked"
               defaultChecked={day.status === 'locked'}
-              aria-label="Lås denna dag"
+              aria-labelledby="lock-day-label"
+              aria-describedby="lock-day-description"
             />
           </div>
 

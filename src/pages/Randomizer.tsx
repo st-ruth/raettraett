@@ -21,7 +21,7 @@ export default function Randomizer() {
     return (
       <div className="randomizer-container">
         <div className="randomizer-header">
-          <h2>Slut på inspo! 🌪️</h2>
+          <h1>Slut på inspo! 🌪️</h1>
           <p>Du har gått igenom alla tillgängliga rätter.</p>
         </div>
       </div>
@@ -31,25 +31,25 @@ export default function Randomizer() {
   return (
     <div className="randomizer-container">
       <div className="randomizer-header">
-        <h2>SÖK INSPO</h2>
+        <h1>SÖK INSPO</h1>
       </div>
       
       <DishCard dish={currentDish} variant="hero">
         <div className="randomizer-actions">
           
           {/* Vänster: Nej */}
-          <button className="action-btn no" onClick={() => handleAction('no')} aria-label="nej">
-            <Angry size={28} />
+          <button type="button" className="action-btn no" onClick={() => handleAction('no')} aria-label="Nej, visa inte den här rätten">
+            <Angry size={28} aria-hidden="true" />
           </button>
           
           {/* Mitten: Kanske (skickar 'maybe') */}
-          <button className="action-btn maybe" onClick={() => handleAction('maybe')} aria-label="kanske">
-            <Meh size={28} />
+          <button type="button" className="action-btn maybe" onClick={() => handleAction('maybe')} aria-label="Kanske, spara rätten som kanske">
+            <Meh size={28} aria-hidden="true" />
           </button>
 
           {/* Höger: Ja (skickar 'yes') */}
-          <button className="action-btn yes" onClick={() => handleAction('yes')} aria-label="ja">
-            <Smile size={28} />
+          <button type="button" className="action-btn yes" onClick={() => handleAction('yes')} aria-label="Ja, spara rätten som ja">
+            <Smile size={28} aria-hidden="true" />
           </button>
           
         </div>

@@ -130,6 +130,36 @@ export function DishProvider({ children }: { children: ReactNode }) {
     });
   };
 
+  const randomizeMealPlanDay = (date: string) => {
+    const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
+    if (yesDishes.length === 0) {
+      alert('Du har inga rätter i Ja-listan att slumpa fram!');
+      return;
+    }
+
+    const randomDish = yesDishes[Math.floor(Math.random() * yesDishes.length)];
+    setMealPlan(prevPlan => {
+      const existingDay = prevPlan.find(day => day.date === date);
+      if (existingDay?.status === 'locked') return prevPlan;
+
+      // Parse as a local date to avoid shifting weekdays across time zones.
+      const dayDate = new Date(`${date}T12:00:00`);
+      const updatedDay: MealPlanDay = {
+        ...(existingDay ?? {
+          id: date,
+          date,
+          dayOfWeek: dayDate.toLocaleDateString('sv-SE', { weekday: 'long' }),
+        }),
+        status: 'generated',
+        recipes: [randomDish],
+      };
+
+      return existingDay
+        ? prevPlan.map(day => day.date === date ? updatedDay : day)
+        : [...prevPlan, updatedDay].sort((a, b) => a.date.localeCompare(b.date));
+    });
+  };
+
   // Vår Slumpa-knapp anropar nu bara hjälpfunktionen!
   const randomizeMealPlan = () => {
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
@@ -151,6 +181,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
       updateDishStatus,
       mealPlan,
       updateMealPlanDay,
+      randomizeMealPlanDay,
       randomizeMealPlan
     }}>
       {children}

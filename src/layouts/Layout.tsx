@@ -7,8 +7,9 @@ import '../styles/layout.css';
 export default function Layout() {
   return (
     <div className="app-layout">
+        <a className="skip-link" href="#main-content">Hoppa till innehåll</a>
         <Header />
-        <main className="main-content">
+        <main className="main-content" id="main-content" tabIndex={-1}>
           <Outlet />
         </main>
         <Footer />

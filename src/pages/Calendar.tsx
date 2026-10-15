@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MessageSquareMore } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Ghost, MessageSquareMore } from 'lucide-react';
 import MonthModal from '../components/MonthModal';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
@@ -53,25 +53,10 @@ export default function CalendarPage() {
   const dynamicMealPlan = weekDays.map((date) => {
     const dateStr = formatDate(date);
     const plannedDay = mealPlan.find(plan => plan.date === dateStr);
-    
-    let title = 'LEDIGT';
-    if (plannedDay) {
-      if (plannedDay.status === 'eating_out') {
-        title = 'BORTA';
-      } else if (plannedDay.recipes.length > 0) {
-        title = plannedDay.recipes[0].title;
-        if (plannedDay.recipes.length > 1) {
-          title += ` (+${plannedDay.recipes.length - 1})`;
-        }
-      } else if (plannedDay.customNote) {
-        title = 'NOTERING';
-      }
-    }
 
     return {
       id: date.toISOString(),
       date: date,
-      title: title,
       plannedDay: plannedDay 
     };
   });
@@ -155,13 +140,28 @@ export default function CalendarPage() {
 
   return (
     <div className="calendar-page">
-      
+      <h1 className="visually-hidden">Kalender</h1>
+
       {/* --- TOP STRIP --- */}
       <div className="calendar-top-strip">
         <div className="strip-header">
-           <button onClick={handlePrevWeek} className="strip-arrow"><ChevronLeft size={20} /></button>
-           <h3>v. {getWeekNumber(weekStartDate)}</h3>
-           <button onClick={handleNextWeek} className="strip-arrow"><ChevronRight size={20} /></button>
+           <button
+             type="button"
+             onClick={handlePrevWeek}
+             className="strip-arrow"
+             aria-label="Visa föregående vecka"
+           >
+             <ChevronLeft size={20} aria-hidden="true" />
+           </button>
+           <h2>Vecka {getWeekNumber(weekStartDate)}</h2>
+           <button
+             type="button"
+             onClick={handleNextWeek}
+             className="strip-arrow"
+             aria-label="Visa nästa vecka"
+           >
+             <ChevronRight size={20} aria-hidden="true" />
+           </button>
         </div>
         
        <div className="strip-boxes">
@@ -171,16 +171,32 @@ export default function CalendarPage() {
             const dayLetters = ['M', 'T', 'O', 'T', 'F', 'L', 'S'];
 
             return (
-              <div 
+              <button
+                type="button"
                 key={plan.id} 
                 className={`strip-box ${isScrolledInFocus ? 'scrolled-active' : ''}`}
                 onClick={() => scrollToCard(plan.date)} 
+                aria-current={isToday ? 'date' : undefined}
+                aria-label={`Visa ${plan.date.toLocaleDateString('sv-SE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                })}${plan.plannedDay?.recipes.length ? `: ${plan.plannedDay.recipes.map(recipe => recipe.title).join(', ')}` : ''}${plan.plannedDay?.status === 'eating_out' ? ': äter borta' : ''}${(!plan.plannedDay || (!plan.plannedDay.recipes.length && plan.plannedDay.status !== 'eating_out' && !plan.plannedDay.customNote)) ? ': ingen planerad måltid' : ''}${plan.plannedDay?.customNote ? ', personlig notis' : ''}`}
               >
-                <div className={`day-letter ${isToday ? 'is-today' : ''}`}>
+                <div className={`day-letter ${isToday ? 'is-today' : ''}`} aria-hidden="true">
                   {dayLetters[i]}
                 </div>
                 <span className="strip-dish-title strip-dish-title-mobile">
-                  {plan.plannedDay?.status === 'eating_out' ? (
+                  {!plan.plannedDay ||
+                  (!plan.plannedDay.recipes.length &&
+                    plan.plannedDay.status !== 'eating_out' &&
+                    !plan.plannedDay.customNote) ? (
+                    <Ghost
+                      className="strip-status-ghost"
+                      size={20}
+                      aria-hidden="true"
+                    />
+                  ) : plan.plannedDay.status === 'eating_out' ? (
                     'BORTA'
                   ) : plan.plannedDay?.recipes.length ? (
                     <>
@@ -194,7 +210,14 @@ export default function CalendarPage() {
                       )}
                     </>
                   ) : (
-                    plan.title
+                    plan.plannedDay?.customNote ? 'NOTERING' : null
+                  )}
+                  {plan.plannedDay?.customNote && (
+                    <MessageSquareMore
+                      className="strip-note-icon"
+                      size={14}
+                      aria-hidden="true"
+                    />
                   )}
                 </span>
                 <div className="strip-dishes-desktop">
@@ -207,10 +230,25 @@ export default function CalendarPage() {
                       </span>
                     ))
                   ) : (
-                    <span className="strip-dish-title">{plan.title}</span>
+                    plan.plannedDay?.customNote ? (
+                      <span className="strip-dish-title">NOTERING</span>
+                    ) : (
+                      <Ghost
+                        className="strip-status-ghost"
+                        size={24}
+                        aria-hidden="true"
+                      />
+                    )
+                  )}
+                  {plan.plannedDay?.customNote && (
+                    <MessageSquareMore
+                      className="strip-note-icon"
+                      size={16}
+                      aria-hidden="true"
+                    />
                   )}
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -228,7 +266,12 @@ export default function CalendarPage() {
               data-date={day.date.toISOString()}
             >
               {!day.plannedDay ? (
-                <DishCard title="Inget planerat" dateLabel={dateLabel} variant="calendar" />
+                <DishCard
+                  title="Inget planerat"
+                  dateLabel={dateLabel}
+                  variant="calendar"
+                  showGhostBadge
+                />
               ) : (
                 <div className="calendar-day-content">
                   {day.plannedDay.status === 'eating_out' ? (
@@ -249,7 +292,12 @@ export default function CalendarPage() {
                     )
                   ) : (
                     !day.plannedDay.customNote && (
-                      <DishCard title="Inget planerat" dateLabel={dateLabel} variant="calendar" />
+                      <DishCard
+                        title="Inget planerat"
+                        dateLabel={dateLabel}
+                        variant="calendar"
+                        showGhostBadge
+                      />
                     )
                   )}
 
@@ -273,7 +321,7 @@ export default function CalendarPage() {
       </div>
 
       <div className="sticky-btn-container">
-        <button className="sticky-month-btn" onClick={() => setIsMonthModalOpen(true)}>
+        <button type="button" className="sticky-month-btn" onClick={() => setIsMonthModalOpen(true)}>
           30 DAGAR
         </button>
       </div>

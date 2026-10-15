@@ -10,22 +10,22 @@ export default function NavBar() {
         <nav className='navbar'>
           
           <NavLink to='/' className='nav-item' aria-label='Hem'>
-            <Home className='nav-icon' />
+            <Home className='nav-icon' aria-hidden="true" />
             <span className='nav-label'>Hem</span>
           </NavLink>
 
            <NavLink to='/slumpa' className='nav-item' aria-label='Slumpa'>
-            <Dices className='nav-icon' />
+            <Dices className='nav-icon' aria-hidden="true" />
             <span className='nav-label'>Slumpgeneratorn</span>
           </NavLink>
 
            <NavLink to='/kalender' className='nav-item' aria-label='Kalender'>
-            <CalendarDays className='nav-icon' />
+            <CalendarDays className='nav-icon' aria-hidden="true" />
             <span className='nav-label'>Kalender</span>
           </NavLink>
 
            <NavLink to='/sparat' className='nav-item' aria-label='Sparat'>
-            <Heart className='nav-icon' />
+            <Heart className='nav-icon' aria-hidden="true" />
             <span className='nav-label'>Sparade listor</span>
           </NavLink>
         </nav>

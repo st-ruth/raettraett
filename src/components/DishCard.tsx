@@ -1,6 +1,6 @@
 import '../styles/dishCard.css';
 import type { ReactNode } from 'react';
-import { Clock, Hourglass } from 'lucide-react';
+import { Clock, Ghost, Hourglass } from 'lucide-react';
 import type { Dish } from '../types/dish';
 
 interface DishCardProps {
@@ -9,6 +9,7 @@ interface DishCardProps {
   title?: string;
   dateLabel?: string;
   showClockBadge?: boolean;
+  showGhostBadge?: boolean;
   variant?: 'hero' | 'calendar' | 'compact' | 'strip'; // 'strip' tillagd här!
   children?: ReactNode;
 }
@@ -19,6 +20,7 @@ export default function DishCard({
   title,
   dateLabel,
   showClockBadge = false,
+  showGhostBadge = false,
   variant = 'calendar', 
   children
 }: DishCardProps) {
@@ -43,33 +45,38 @@ export default function DishCard({
             <div className="dish-card-recipe-row" key={recipe.id}>
               <div className="dish-card-icons">
                 {recipe.isQuick && (
-                  <span className="dish-icon-badge" title="Snabblagat (<30 min)">
-                    <Clock size={18} className="dish-icon" />
+                  <span className="dish-icon-badge" role="img" aria-label="Snabblagat, under 30 minuter" title="Snabblagat (<30 min)">
+                    <Clock size={18} className="dish-icon" aria-hidden="true" />
                   </span>
                 )}
                 {recipe.isSlowCooked && (
-                  <span className="dish-icon-badge" title="Långkok">
-                    <Hourglass size={18} className="dish-icon" />
+                  <span className="dish-icon-badge" role="img" aria-label="Långkok" title="Långkok">
+                    <Hourglass size={18} className="dish-icon" aria-hidden="true" />
                   </span>
                 )}
               </div>
-              <h3>{recipe.title}</h3>
+              <h2>{recipe.title}</h2>
             </div>
           ))}
         </div>
       ) : (
         <div className="dish-card-content">
-          <h3>{title ?? dish?.title ?? recipes?.[0]?.title}</h3>
+          <h2>{title ?? dish?.title ?? recipes?.[0]?.title}</h2>
 
           <div className="dish-card-icons">
+            {showGhostBadge && (
+              <span className="dish-icon-badge" role="img" aria-label="Inget planerat" title="Inget planerat">
+                <Ghost size={18} className="dish-icon dish-icon-ghost" aria-hidden="true" />
+              </span>
+            )}
             {(dish?.isQuick || showClockBadge) && (
-              <span className="dish-icon-badge" title={dish?.isQuick ? 'Snabblagat (<30 min)' : 'Tillagningstid'}>
-                <Clock size={18} className="dish-icon" />
+              <span className="dish-icon-badge" role="img" aria-label={dish?.isQuick ? 'Snabblagat, under 30 minuter' : 'Tillagningstid'} title={dish?.isQuick ? 'Snabblagat (<30 min)' : 'Tillagningstid'}>
+                <Clock size={18} className="dish-icon" aria-hidden="true" />
               </span>
             )}
             {dish?.isSlowCooked && (
-              <span className="dish-icon-badge" title="Långkok">
-                <Hourglass size={18} className="dish-icon" />
+              <span className="dish-icon-badge" role="img" aria-label="Långkok" title="Långkok">
+                <Hourglass size={18} className="dish-icon" aria-hidden="true" />
               </span>
             )}
           </div>
