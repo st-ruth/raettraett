@@ -27,3 +27,35 @@
   margin-inline: auto;
   box-sizing: border-box;
 }
+
+.home-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 24px auto 0;
+  width: 100%;
+  max-width: 350px;
+  box-sizing: border-box;
+}
+
+.home-actions .action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-weekly-btn {
+  padding: 12px 32px;
+  border: none;
+  border-radius: 6px;
+  background-color: #1e1e24;
+  color: #ffffff;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.home-weekly-btn:hover {
+  background-color: #33333d;
+}

@@ -1,5 +1,22 @@
 import { X, Clock, Hourglass } from 'lucide-react';
+import { useDishContext } from '../context/useDishContext';
+import type { CarbType, Dish, PreferredDays, ProteinType } from '../types/dish';
+import '../styles/modal.css';
 import '../styles/dishFormModal.css'; 
+
+const preferredDayOptions: readonly PreferredDays[] = ['weekdays', 'weekends', 'both'];
+const proteinOptions: readonly ProteinType[] = [
+  'mince', 'chicken', 'sausage', 'meat', 'pork', 'fish', 'stew',
+  'soup', 'cheese', 'egg', 'mushroom', 'pulled', 'legumes', 'other',
+];
+const carbOptions: readonly CarbType[] = [
+  'pasta', 'rice', 'potatoes', 'salad', 'bulgur_couscous', 'noodles', 'bread', 'other',
+];
+
+const isChoice = <T extends string>(
+  options: readonly T[],
+  value: FormDataEntryValue | null
+): value is T => typeof value === 'string' && options.some(option => option === value);
 
 interface DishFormModalProps {
   isOpen: boolean;       
@@ -7,10 +24,53 @@ interface DishFormModalProps {
 }
 
 export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
+  const { addDish } = useDishContext();
+
   if (!isOpen) return null;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const title = formData.get('title');
+    const preferredDays = formData.get('preferredDays');
+    const proteinType = formData.get('proteinType');
+    const carbType = formData.get('carbType');
+    const cookingTime = formData.get('cookingTime');
+
+    if (
+      typeof title !== 'string' ||
+      !title.trim() ||
+      !isChoice(preferredDayOptions, preferredDays) ||
+      !isChoice(proteinOptions, proteinType)
+    ) {
+      window.alert('Fyll i rättens namn, passande dagar och huvudprotein.');
+      return;
+    }
+
+    const dish: Omit<Dish, 'id' | 'status'> = {
+      title: title.trim(),
+      preferredDays,
+      proteinType,
+    };
+
+    const category = formData.get('category');
+    if (typeof category === 'string' && category.trim()) {
+      dish.category = category.trim();
+    }
+
+    if (isChoice(carbOptions, carbType)) {
+      dish.carbType = carbType;
+    }
+
+    if (cookingTime === 'quick') {
+      dish.isQuick = true;
+    } else if (cookingTime === 'slow') {
+      dish.isSlowCooked = true;
+    }
+
+    addDish(dish);
+    onClose();
   };
 
   // Förhindra att sidan i bakgrunden scrollas när modalen är öppen

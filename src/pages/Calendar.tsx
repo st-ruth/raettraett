@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { ChevronLeft, ChevronRight, MessageSquareMore } from 'lucide-react';
 import MonthModal from '../components/MonthModal';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
@@ -25,8 +25,7 @@ export default function CalendarPage() {
   const [weekStartDate, setWeekStartDate] = useState(getMonday(new Date()));
   const [activeDate, setActiveDate] = useState(new Date());
 
-  const { dishes } = useDishContext();
-  const calendarDishes = dishes.filter(dish => dish.status === 'yes' || dish.status === 'repo');
+  const { mealPlan } = useDishContext();
 
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(weekStartDate);
@@ -46,72 +45,113 @@ export default function CalendarPage() {
     setWeekStartDate(newDate);
   };
 
-  const dynamicMealPlan = weekDays.map((date, index) => {
-    const dishForDay = calendarDishes[index % calendarDishes.length]; 
+  const formatDate = (d: Date) => {
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - offset).toISOString().slice(0, 10);
+  };
+
+  const dynamicMealPlan = weekDays.map((date) => {
+    const dateStr = formatDate(date);
+    const plannedDay = mealPlan.find(plan => plan.date === dateStr);
+    
+    let title = 'LEDIGT';
+    if (plannedDay) {
+      if (plannedDay.status === 'eating_out') {
+        title = 'BORTA';
+      } else if (plannedDay.recipes.length > 0) {
+        title = plannedDay.recipes[0].title;
+        if (plannedDay.recipes.length > 1) {
+          title += ` (+${plannedDay.recipes.length - 1})`;
+        }
+      } else if (plannedDay.customNote) {
+        title = 'NOTERING';
+      }
+    }
+
     return {
       id: date.toISOString(),
       date: date,
-      title: dishForDay ? dishForDay.title : 'LEDIGT',
-      dish: dishForDay 
+      title: title,
+      plannedDay: plannedDay 
     };
   });
 
-  // 1. Vi använder Intersection Observer istället!
-  // Detta ref håller koll på själva containern
-  const observer = useRef<IntersectionObserver | null>(null);
+  const cardsContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // 2. Denna callback-funktion körs på VARJE dagskort när det ritas ut.
-  // Den kopplar webbläsarens "ögat" (observer) till kortet.
-  const cardRefCallback = useCallback((node: HTMLDivElement | null) => {
-    if (!node) return; // Om kortet försvinner, bry dig inte
+  useEffect(() => {
+    const container = cardsContainerRef.current;
+    if (!container) return;
 
-    // Skapa bara observern EN gång
-    if (!observer.current) {
-      observer.current = new IntersectionObserver(
-        (entries) => {
-          // Gå igenom alla kort som webbläsaren kollade på nu
-          entries.forEach(entry => {
-            // Om kortet är synligt (intersecting) till mer än 50%
-            if (entry.isIntersecting) {
-               // Fiska upp vilket datum kortet har (vi sparade det i data-date på div:en)
-               const dateString = entry.target.getAttribute('data-date');
-               if (dateString) {
-                  const newDate = new Date(dateString);
-                  // Uppdatera bara om det är en ny dag!
-                  setActiveDate(prevDate => {
-                    if (prevDate.toDateString() !== newDate.toDateString()) {
-                       return newDate;
-                    }
-                    return prevDate;
-                  });
-               }
-            }
-          });
-        },
-        { 
-          // Roten är själva fönstret
-          root: null, 
-          // Kortet måste synas till 50% för att räknas som "aktivt"
-          threshold: 0.5 
-        }
+    let animationFrameId = 0;
+
+    const updateCenteredCard = () => {
+      animationFrameId = 0;
+      const viewportCenter = window.innerHeight / 2;
+      const cards = Array.from(container.querySelectorAll<HTMLElement>('.calendar-day-card'));
+      const centeredCard = cards.reduce<HTMLElement | null>((closest, card) => {
+        if (!closest) return card;
+        const cardCenter = card.getBoundingClientRect().top + card.offsetHeight / 2;
+        const closestCenter =
+          closest.getBoundingClientRect().top + closest.offsetHeight / 2;
+        return Math.abs(cardCenter - viewportCenter) < Math.abs(closestCenter - viewportCenter)
+          ? card
+          : closest;
+      }, null);
+
+      const dateString = centeredCard?.getAttribute('data-date');
+      if (!dateString) return;
+
+      const newDate = new Date(dateString);
+      setActiveDate(prevDate =>
+        prevDate.toDateString() === newDate.toDateString() ? prevDate : newDate
       );
-    }
-    
-    // Tala om för webbläsaren att bevaka detta specifika kort
-    observer.current.observe(node);
-  }, []); // Tom array betyder "skapa denna funktion bara en gång"
+    };
 
+    const scheduleUpdate = () => {
+      if (animationFrameId === 0) {
+        animationFrameId = window.requestAnimationFrame(updateCenteredCard);
+      }
+    };
 
-  // En funktion för att klicka och rulla (som vi behåller)
+    container.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('scroll', scheduleUpdate, { passive: true });
+    window.addEventListener('resize', scheduleUpdate);
+    scheduleUpdate();
+
+    return () => {
+      container.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('scroll', scheduleUpdate);
+      window.removeEventListener('resize', scheduleUpdate);
+      if (animationFrameId !== 0) {
+        window.cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [weekStartDate]);
+
   const scrollToCard = (date: Date) => {
-    setActiveDate(date);
-    // Leta upp kortet i webbläsaren (eftersom vi satte data-date på det)
     const element = document.querySelector(`[data-date="${date.toISOString()}"]`);
     if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Ändrat till block: 'center' eller 'start' med scroll-margin
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
 
+  // Scrolla till dagens kort vid laddning
+  useEffect(() => {
+    const todayStr = new Date().toDateString();
+    const timeoutId = window.setTimeout(() => {
+      const cards = document.querySelectorAll('.calendar-day-card');
+      const todayCard = Array.from(cards).find((card) => {
+        const cardDate = new Date(card.getAttribute('data-date') || '').toDateString();
+        return cardDate === todayStr;
+      });
+
+      // Ändrat till block: 'center' så det hamnar fritt från toppmenyn!
+      todayCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 150);
+
+    return () => window.clearTimeout(timeoutId);
+  }, []);
 
   return (
     <div className="calendar-page">
@@ -126,26 +166,50 @@ export default function CalendarPage() {
         
        <div className="strip-boxes">
           {dynamicMealPlan.map((plan, i) => {
-            // 1. Är det här kortet samma datum som IDAG (den 14/10)?
             const isToday = plan.date.toDateString() === new Date().toDateString();
-            
-            // 2. Är det här kortet i fokus i vår infinity scroll just nu?
             const isScrolledInFocus = plan.date.toDateString() === activeDate.toDateString();
-            
             const dayLetters = ['M', 'T', 'O', 'T', 'F', 'L', 'S'];
 
             return (
               <div 
                 key={plan.id} 
-                // Om vi tittar på detta kort i listan, ge det klassen "scrolled-active"
                 className={`strip-box ${isScrolledInFocus ? 'scrolled-active' : ''}`}
                 onClick={() => scrollToCard(plan.date)} 
               >
-                {/* Den lilla bokstaven. Om dagen är IDAG, får den klassen 'is-today' (svart boll) */}
                 <div className={`day-letter ${isToday ? 'is-today' : ''}`}>
                   {dayLetters[i]}
                 </div>
-                <span className="strip-dish-title">{plan.title}</span>
+                <span className="strip-dish-title strip-dish-title-mobile">
+                  {plan.plannedDay?.status === 'eating_out' ? (
+                    'BORTA'
+                  ) : plan.plannedDay?.recipes.length ? (
+                    <>
+                      <span className="strip-dish-mobile-name">
+                        {plan.plannedDay.recipes[0].title}
+                      </span>
+                      {plan.plannedDay.recipes.length > 1 && (
+                        <span className="strip-dish-mobile-count">
+                          (+{plan.plannedDay.recipes.length - 1})
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    plan.title
+                  )}
+                </span>
+                <div className="strip-dishes-desktop">
+                  {plan.plannedDay?.status === 'eating_out' ? (
+                    <span className="strip-dish-title">BORTA</span>
+                  ) : plan.plannedDay?.recipes.length ? (
+                    plan.plannedDay.recipes.map((recipe, index) => (
+                      <span className="strip-dish-title" key={`${recipe.id}-${index}`}>
+                        {recipe.title}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="strip-dish-title">{plan.title}</span>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -153,23 +217,56 @@ export default function CalendarPage() {
       </div>
 
       {/* --- KORT-VYN (Infinity scroll) --- */}
-      <div className="calendar-cards-container">
+      <div className="calendar-cards-container" ref={cardsContainerRef}>
         {dynamicMealPlan.map((day) => {
+          const dateLabel = day.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'numeric' });
+          
           return (
             <div 
               key={day.id} 
               className="calendar-day-card"
-              // 3. Vi fäster vår "ögon-funktion" på kortet här
-              ref={cardRefCallback}
-              // 4. Vi sparar datumet som text direkt på div:en, så att observern kan läsa av det!
               data-date={day.date.toISOString()}
             >
-              <DishCard
-                dish={day.dish}
-                title={day.title}
-                dateLabel={day.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'numeric' })}
-                variant="calendar"
-              />
+              {!day.plannedDay ? (
+                <DishCard title="Inget planerat" dateLabel={dateLabel} variant="calendar" />
+              ) : (
+                <div className="calendar-day-content">
+                  {day.plannedDay.status === 'eating_out' ? (
+                    <DishCard title="Äter borta" dateLabel={dateLabel} variant="calendar" />
+                  ) : day.plannedDay.recipes.length > 0 ? (
+                    day.plannedDay.recipes.length > 1 ? (
+                      <DishCard
+                        recipes={day.plannedDay.recipes}
+                        dateLabel={dateLabel}
+                        variant="calendar"
+                      />
+                    ) : (
+                      <DishCard
+                        dish={day.plannedDay.recipes[0]}
+                        dateLabel={dateLabel}
+                        variant="calendar"
+                      />
+                    )
+                  ) : (
+                    !day.plannedDay.customNote && (
+                      <DishCard title="Inget planerat" dateLabel={dateLabel} variant="calendar" />
+                    )
+                  )}
+
+                  {day.plannedDay.customNote && (
+                    <div
+                      className={`calendar-day-note ${
+                        day.plannedDay.status === 'eating_out' || day.plannedDay.recipes.length > 0
+                          ? 'calendar-day-note-after-card'
+                          : ''
+                      }`}
+                    >
+                      <MessageSquareMore size={20} aria-hidden="true" />
+                      <p>{day.plannedDay.customNote}</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

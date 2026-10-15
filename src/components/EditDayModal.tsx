@@ -1,54 +1,129 @@
-import { X, Plus, Trash2, Lock, Unlock } from 'lucide-react';
-import '../styles/editdaymodal.css';
+import { useState } from 'react';
+import { X, Trash2, LockKeyhole, Dices, Dice5 } from 'lucide-react'; 
+import '../styles/modal.css';
 import type { MealPlanDay } from '../types/mealPlan';
+import { useDishContext } from '../context/useDishContext';
 
 interface EditDayModalProps {
-    day: MealPlanDay;
-    isOpen: boolean;
-    onClose: () => void;
+  day: MealPlanDay;
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (updatedDay: MealPlanDay) => void;
 }
 
-export default function EditDayModal({day, isOpen, onClose}: EditDayModalProps){
-    if(!isOpen) return null; 
+export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayModalProps) {
+  const { dishes } = useDishContext();
+  const [currentRecipes, setCurrentRecipes] = useState(day.recipes);
 
-    const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  if (!isOpen) return null;
+
+  // Lägg till en slumpad rätt
+  const handleAddRandomDish = () => {
+    const repoDishes = dishes.filter(d => d.status === 'repo');
+    const availableDishes = repoDishes.filter(
+      rd => !currentRecipes.some(cr => cr.id === rd.id)
+    );
+
+    if (availableDishes.length === 0) {
+      alert('Du har inga fler lediga rätter att slumpa fram!');
+      return;
+    }
+
+    const randomIndex = Math.floor(Math.random() * availableDishes.length);
+    const randomDish = availableDishes[randomIndex];
+
+    setCurrentRecipes([...currentRecipes, randomDish]);
   };
 
-const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-  if (e.target === e.currentTarget) {
-    onClose();
-  }
-};
+  // Byt ut en specifik rätt mot en ny slumpad
+  const handleSwapDish = (indexToSwap: number) => {
+    const repoDishes = dishes.filter(d => d.status === 'repo');
+    const availableDishes = repoDishes.filter(
+      rd => !currentRecipes.some(cr => cr.id === rd.id)
+    );
 
-    return (
+    if (availableDishes.length === 0) {
+      alert('Inga fler lediga rätter att byta till!');
+      return;
+    }
+
+    // eslint-disable-next-line react-hooks/purity
+    const randomDish = availableDishes[Math.floor(Math.random() * availableDishes.length)];
+    
+    // Kopiera arrayen och byt ut just den rätten
+    const newRecipes = [...currentRecipes];
+    newRecipes[indexToSwap] = randomDish;
+    
+    setCurrentRecipes(newRecipes);
+  };
+
+  // Ta bort en rätt
+  const handleRemoveDish = (dishId: string) => {
+    setCurrentRecipes(currentRecipes.filter(dish => dish.id !== dishId));
+  };
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+    const customNote = formData.get('customNote') as string;
+    const isLocked = formData.get('isLocked') === 'on';
+
+    const updatedDay: MealPlanDay = {
+      ...day,
+      customNote,
+      recipes: currentRecipes, 
+      status: isLocked 
+        ? 'locked' 
+        : (day.status === 'locked' ? 'generated' : day.status), 
+    };
+
+    onSave(updatedDay);
+  };
+
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  };
+
+  return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-        <div className="modal-content">
-            <div className="modal-header">
-                <h1>{day.date} | {day.dayOfWeek}</h1>
-                <button className="close-btn" onClick={onClose} aria-label="Stäng">
-                    <X size={24} />
-                </button>
-            </div>
-            
-            <form className="edit-day-form" onSubmit={handleSubmit}> 
-            
-            {/* Dagens rätter */}
+      <div className="modal-content">
+        <div className="modal-header">
+          <h1>{day.date} | {day.dayOfWeek}</h1>
+          <button className="close-btn" onClick={onClose} aria-label="Stäng">
+            <X size={24} />
+          </button>
+        </div>
+
+        <form className="edit-day-form" onSubmit={handleSubmit}>
+          {/* Dagens rätter */}
           <div className="form-group">
             <label>Dagens rätter</label>
 
-            {day.recipes.length > 0 ? (
+            {currentRecipes.length > 0 ? (
               <div className="planned-dishes">
-                {day.recipes.map((dish) => (
-                  <div className="planned-dish" key={dish.id}>
-                    <span>{dish.title}</span>
+                {currentRecipes.map((dish, index) => (
+                  <div className="planned-dish" key={dish.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ flex: 1 }}>{dish.title}</span>
+
+                    <button
+                      type="button"
+                      className="swap-dish-btn"
+                      onClick={() => handleSwapDish(index)}
+                      aria-label={`Byt ut ${dish.title}`}
+                      title={`Byt ut ${dish.title}`}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#ffffff', display: 'flex' }}
+                    >
+                      <Dice5 size={18} />
+                    </button>
 
                     <button
                       type="button"
                       className="remove-dish-btn"
+                      onClick={() => handleRemoveDish(dish.id)}
                       aria-label={`Ta bort ${dish.title}`}
                       title={`Ta bort ${dish.title}`}
-                      disabled
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}
                     >
                       <Trash2 size={18} />
                     </button>
@@ -56,23 +131,17 @@ const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
                 ))}
               </div>
             ) : (
-              <p className="empty-dishes">
-                Inga rätter planerade ännu.
-              </p>
+              <p className="empty-dishes">Inga rätter planerade ännu.</p>
             )}
 
-            <button
-              type="button"
-              className="add-dish-btn"
-              disabled
+            <button 
+              type="button" 
+              className="add-dish-btn" 
+              onClick={handleAddRandomDish}
             >
-              <Plus size={18} />
-              Lägg till rätt
+              <Dices size={18} />
+              Slumpa in extra rätt
             </button>
-
-            <small>
-              Möjlighet att lägga till och ta bort rätter kopplas in senare.
-            </small>
           </div>
 
           {/* Kommentar */}
@@ -91,11 +160,7 @@ const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
           {/* Lås dag */}
           <div className="edit-day-lock">
             <div className="edit-day-lock-label">
-              {day.status === 'locked' ? (
-                <Lock size={20} />
-              ) : (
-                <Unlock size={20} />
-              )}
+              <LockKeyhole size={20} />
 
               <div>
                 <span>Lås denna dag</span>
@@ -115,11 +180,7 @@ const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
 
           {/* Knappar */}
           <div className="form-actions">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={onClose}
-            >
+            <button type="button" className="btn-secondary" onClick={onClose}>
               Avbryt
             </button>
 
@@ -127,7 +188,6 @@ const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
               Spara
             </button>
           </div>
-
         </form>
       </div>
     </div>

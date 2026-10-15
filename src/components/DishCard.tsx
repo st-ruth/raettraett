@@ -5,6 +5,7 @@ import type { Dish } from '../types/dish';
 
 interface DishCardProps {
   dish?: Dish;
+  recipes?: Dish[];
   title?: string;
   dateLabel?: string;
   showClockBadge?: boolean;
@@ -14,6 +15,7 @@ interface DishCardProps {
 
 export default function DishCard({
   dish,
+  recipes,
   title,
   dateLabel,
   showClockBadge = false,
@@ -32,25 +34,47 @@ export default function DishCard({
 
   // 2. Standard-rendering för stora kort (calendar, hero, compact)
   return (
-    <div className={`dish-card ${variant}`}>
+    <div className={`dish-card ${variant} ${recipes && recipes.length > 1 ? 'dish-card-with-recipes' : ''}`}>
       {dateLabel && <span className="dish-card-date">{dateLabel}</span>}
-      
-      <div className="dish-card-content">
-        <h3>{title ?? dish?.title}</h3>
-        
-        <div className="dish-card-icons">
-          {(dish?.isQuick || showClockBadge) && (
-            <span className="dish-icon-badge" title={dish?.isQuick ? 'Snabblagat (<30 min)' : 'Tillagningstid'}>
-              <Clock size={18} className="dish-icon" />
-            </span>
-          )}
-          {dish?.isSlowCooked && (
-            <span className="dish-icon-badge" title="Långkok">
-              <Hourglass size={18} className="dish-icon" />
-            </span>
-          )}
+
+      {recipes && recipes.length > 1 ? (
+        <div className="dish-card-recipe-list">
+          {recipes.map((recipe) => (
+            <div className="dish-card-recipe-row" key={recipe.id}>
+              <div className="dish-card-icons">
+                {recipe.isQuick && (
+                  <span className="dish-icon-badge" title="Snabblagat (<30 min)">
+                    <Clock size={18} className="dish-icon" />
+                  </span>
+                )}
+                {recipe.isSlowCooked && (
+                  <span className="dish-icon-badge" title="Långkok">
+                    <Hourglass size={18} className="dish-icon" />
+                  </span>
+                )}
+              </div>
+              <h3>{recipe.title}</h3>
+            </div>
+          ))}
         </div>
-      </div>
+      ) : (
+        <div className="dish-card-content">
+          <h3>{title ?? dish?.title ?? recipes?.[0]?.title}</h3>
+
+          <div className="dish-card-icons">
+            {(dish?.isQuick || showClockBadge) && (
+              <span className="dish-icon-badge" title={dish?.isQuick ? 'Snabblagat (<30 min)' : 'Tillagningstid'}>
+                <Clock size={18} className="dish-icon" />
+              </span>
+            )}
+            {dish?.isSlowCooked && (
+              <span className="dish-icon-badge" title="Långkok">
+                <Hourglass size={18} className="dish-icon" />
+              </span>
+            )}
+          </div>
+        </div>
+      )}
 
       {children && (
         <div className="dish-card-actions">

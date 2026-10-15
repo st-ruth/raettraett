@@ -3,6 +3,7 @@
 // Lägg till knappar för ny mat samt ta till kalender
 
 import { useNavigate } from 'react-router-dom';
+import { Dices } from 'lucide-react';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext';
 import '../styles/actionButtons.css';
@@ -23,13 +24,21 @@ export default function Home() {
       
       {/* 3. Vi skickar in den globalt valda rätten */}
       <DishCard dish={currentDish ?? undefined} variant="hero">
-        <div className="randomizer-actions">
-          <button className="action-btn" onClick={randomizeDish}>
-            fel rätt
+        <div className="home-actions">
+          <button
+            className="action-btn"
+            onClick={randomizeDish}
+            aria-label="Slumpa fram en ny rätt"
+            title="Slumpa fram en ny rätt"
+          >
+            <Dices size={20} aria-hidden="true" />
           </button>
 
-          <button className="action-btn" onClick={() => navigate('/kalender')}>
-            imorgon
+          <button
+            className="home-weekly-btn"
+            onClick={() => navigate('/kalender')}
+          >
+            VECKANS MATSEDEL
           </button>
         </div>
       </DishCard>

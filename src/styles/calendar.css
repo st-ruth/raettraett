@@ -86,6 +86,32 @@
   -webkit-box-orient: vertical;
 }
 
+.strip-dishes-desktop {
+  display: none;
+}
+
+.strip-dish-mobile-name {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
+
+.strip-dish-title-mobile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+  color: #ffffff;
+  font-size: 0.6rem;
+  -webkit-line-clamp: unset;
+}
+
+.strip-dish-mobile-count {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 .text-muted {
   color: #888;
 }
@@ -105,6 +131,51 @@
 }
 
 /* --- Dagskorten --- */
+.calendar-day-card {
+  scroll-margin-top: 140px;
+}
+
+.calendar-day-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.calendar-day-content .dish-card.calendar {
+  margin: 8px auto;
+}
+
+.calendar-day-note {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 0;
+  margin-top: 0;
+  padding: 12px 16px;
+  border: 1px solid var(--color-ui, #33333d);
+  color: var(--color-active, #ffffff);
+  background: var(--color-ui);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.calendar-day-note-after-card {
+  margin-top: -8px;
+}
+
+.calendar-day-note svg {
+  flex: 0 0 auto;
+}
+
+.calendar-day-note p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
 .calendar-cards-container {
   padding: 0 16px 100px 16px; /* Extra padding i botten så korten inte fastnar under knappen */
   display: flex;
@@ -159,6 +230,43 @@
 
 /* Desktop-justeringar (Tablets och datorer) */
 @media (min-width: 768px) {
+  .strip-dish-title-mobile {
+    display: none;
+  }
+
+  .strip-box .day-letter {
+    flex: 0 0 auto;
+    margin-bottom: 4px;
+  }
+
+  .strip-dishes-desktop {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 0;
+    color: #ffffff;
+  }
+
+  .strip-dishes-desktop .strip-dish-title {
+    display: block;
+    width: 100%;
+    color: inherit;
+    font-size: 0.85rem;
+    font-weight: 400;
+    line-height: 1.2;
+    text-align: center;
+    -webkit-line-clamp: unset;
+  }
+
+  .strip-dishes-desktop .strip-dish-title + .strip-dish-title {
+    margin-top: 4px;
+    padding-top: 4px;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
   .sticky-month-btn {
     bottom: 16px;
   }

@@ -21,6 +21,7 @@ export type CarbType =
 | 'pasta' 
 | 'rice' 
 | 'potatoes' 
+| 'salad'
 | 'bulgur_couscous' 
 | 'noodles' 
 | 'bread'
