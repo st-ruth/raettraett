@@ -1,6 +1,7 @@
 import { Smile, Meh, Angry } from 'lucide-react';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
+import type { DishStatus } from '../types/dish';
 import '../styles/actionButtons.css'; // Din styling bevarad!
 import '../styles/randomizer.css'; 
 
@@ -8,7 +9,7 @@ export default function Randomizer() {
   const { currentDish, randomizeDish, updateDishStatus } = useDishContext();
 
   // Tar nu emot engelska statusar för att matcha databasen
-  const handleAction = (newStatus: 'yes' | 'maybe' | 'blocked') => {
+  const handleAction = (newStatus: DishStatus) => {
     if (currentDish) {
       updateDishStatus(currentDish.id, newStatus);
       randomizeDish();
@@ -36,8 +37,8 @@ export default function Randomizer() {
       <DishCard dish={currentDish} variant="hero">
         <div className="randomizer-actions">
           
-          {/* Vänster: Nej (skickar 'blocked') */}
-          <button className="action-btn no" onClick={() => handleAction('blocked')} aria-label="nej">
+          {/* Vänster: Nej */}
+          <button className="action-btn no" onClick={() => handleAction('no')} aria-label="nej">
             <Angry size={28} />
           </button>
           

@@ -1,16 +1,20 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';
-import { dummyDishes, mockMealPlan } from '../data/dummyData';
+import { dummyDishes, dummyDishStatuses, mockMealPlan } from '../data/dummyData';
 
 // --- HJÄLPFUNKTION: Bygger ut matsedeln till 35 dagar ---
 // Vi lägger den utanför så vi kan använda den både vid start och när man trycker "Slumpa Ny"
-const generateFullPlan = (currentPlan: MealPlanDay[], availableDishes: Dish[]): MealPlanDay[] => {
-  const repoDishes = availableDishes.filter(d => d.status === 'repo');
-  
-  if (repoDishes.length === 0) return currentPlan;
+const generateFullPlan = (
+  currentPlan: MealPlanDay[],
+  availableDishes: Dish[],
+  userDishStatuses: Record<string, DishStatus>
+): MealPlanDay[] => {
+  const yesDishes = availableDishes.filter(dish => userDishStatuses[dish.id] === 'yes');
+
+  if (yesDishes.length === 0) return currentPlan;
 
   const today = new Date();
   const offsetToday = today.getTimezoneOffset() * 60000;
@@ -34,8 +38,8 @@ const generateFullPlan = (currentPlan: MealPlanDay[], availableDishes: Dish[]): 
     if (existingDay && existingDay.status === 'locked') {
       upcomingDays.push(existingDay);
     } else {
-      const randomIndex = Math.floor(Math.random() * repoDishes.length);
-      const randomDish = repoDishes[randomIndex];
+      const randomIndex = Math.floor(Math.random() * yesDishes.length);
+      const randomDish = yesDishes[randomIndex];
 
       upcomingDays.push({
         ...(existingDay || {
@@ -55,41 +59,64 @@ const generateFullPlan = (currentPlan: MealPlanDay[], availableDishes: Dish[]): 
 
 export function DishProvider({ children }: { children: ReactNode }) {
   const [dishes, setDishes] = useState<Dish[]>(dummyDishes);
-  const [currentDish, setCurrentDish] = useState<Dish | null>(dummyDishes[0]);
+  const [userDishStatuses, setUserDishStatuses] = useState<Record<string, DishStatus>>(dummyDishStatuses);
+  const userDishStatusesRef = useRef(userDishStatuses);
+  const [currentDish, setCurrentDish] = useState<Dish | null>(
+    () => dummyDishes.find(dish => !dummyDishStatuses[dish.id]) ?? null
+  );
 
   // --- LAZY INITIALIZATION ---
   // Genom att skicka in en pilfunktion här, körs den bara EN gång vid start.
   // Appen får 35 dagar direkt, ingen useEffect behövs!
   const [mealPlan, setMealPlan] = useState<MealPlanDay[]>(() => {
-    return generateFullPlan(mockMealPlan, dummyDishes);
+    return generateFullPlan(mockMealPlan, dummyDishes, dummyDishStatuses);
   });
 
-  const updateDishStatus = (id: string, newStatus: DishStatus) => {
-    setDishes(prevDishes => 
-      prevDishes.map(dish => 
-        dish.id === id ? { ...dish, status: newStatus } : dish
-      )
-    );
+  const updateDishStatus = (id: string, newStatus: DishStatus | undefined) => {
+    const nextStatuses = { ...userDishStatusesRef.current };
+    if (newStatus) {
+      nextStatuses[id] = newStatus;
+    } else {
+      delete nextStatuses[id];
+    }
+    userDishStatusesRef.current = nextStatuses;
+    setUserDishStatuses(nextStatuses);
+
+    if (newStatus !== 'yes') {
+      const today = new Date();
+      const offset = today.getTimezoneOffset() * 60000;
+      const todayStr = new Date(today.getTime() - offset).toISOString().slice(0, 10);
+
+      setMealPlan(prevPlan =>
+        prevPlan.map(day =>
+          day.date >= todayStr
+            ? { ...day, recipes: day.recipes.filter(recipe => recipe.id !== id) }
+            : day
+        )
+      );
+    }
   };
 
-  const addDish = (newDish: Omit<Dish, 'id' | 'status'>) => {
+  const addDish = (newDish: Omit<Dish, 'id'>) => {
     const dish: Dish = {
       ...newDish,
       id: crypto.randomUUID(),
-      status: 'yes',
     };
 
     setDishes(prevDishes => [dish, ...prevDishes]);
+    const nextStatuses = { ...userDishStatusesRef.current, [dish.id]: 'yes' as const };
+    userDishStatusesRef.current = nextStatuses;
+    setUserDishStatuses(nextStatuses);
   };
 
   const randomizeDish = () => {
-    const repoDishes = dishes.filter(dish => dish.status === 'repo');
-    if (repoDishes.length === 0) {
+    const unseenDishes = dishes.filter(dish => !userDishStatusesRef.current[dish.id]);
+    if (unseenDishes.length === 0) {
       setCurrentDish(null);
       return;
     }
-    const randomIndex = Math.floor(Math.random() * repoDishes.length);
-    setCurrentDish(repoDishes[randomIndex]);
+    const randomIndex = Math.floor(Math.random() * unseenDishes.length);
+    setCurrentDish(unseenDishes[randomIndex]);
   };
 
   const updateMealPlanDay = (updatedDay: MealPlanDay) => {
@@ -105,18 +132,19 @@ export function DishProvider({ children }: { children: ReactNode }) {
 
   // Vår Slumpa-knapp anropar nu bara hjälpfunktionen!
   const randomizeMealPlan = () => {
-    const repoDishes = dishes.filter(d => d.status === 'repo');
-    if (repoDishes.length === 0) {
-      alert("Du har inga rätter i din bank att slumpa fram!");
+    const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
+    if (yesDishes.length === 0) {
+      alert('Du har inga rätter i Ja-listan att slumpa fram!');
       return;
     }
 
-    setMealPlan(prevPlan => generateFullPlan(prevPlan, dishes));
+    setMealPlan(prevPlan => generateFullPlan(prevPlan, dishes, userDishStatusesRef.current));
   };
 
   return (
     <DishContext.Provider value={{ 
       dishes, 
+      userDishStatuses,
       currentDish, 
       randomizeDish, 
       addDish,

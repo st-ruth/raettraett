@@ -48,7 +48,7 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
       return;
     }
 
-    const dish: Omit<Dish, 'id' | 'status'> = {
+    const dish: Omit<Dish, 'id'> = {
       title: title.trim(),
       preferredDays,
       proteinType,

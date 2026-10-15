@@ -6,10 +6,11 @@ import type { MealPlanDay } from '../types/mealPlan';
 
 export interface DishContextType {
   dishes: Dish[];
+  userDishStatuses: Record<string, DishStatus>;
   currentDish: Dish | null; 
   randomizeDish: () => void;
-  addDish: (newDish: Omit<Dish, 'id' | 'status'>) => void;
-  updateDishStatus: (id: string, newStatus: DishStatus) => void;
+  addDish: (newDish: Omit<Dish, 'id'>) => void;
+  updateDishStatus: (id: string, newStatus: DishStatus | undefined) => void;
   mealPlan: MealPlanDay[];
   updateMealPlanDay: (updatedDay: MealPlanDay) => void;
   randomizeMealPlan: () => void;

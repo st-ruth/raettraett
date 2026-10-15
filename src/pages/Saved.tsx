@@ -6,7 +6,7 @@ import { useDishContext } from '../context/useDishContext';
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock, Hourglass } from 'lucide-react';
 import '../styles/saved.css';
 
-type Tab = 'yes' | 'maybe' | 'blocked';
+type Tab = 'yes' | 'no' | 'maybe';
 
 export default function Saved() {
   const [activeTab, setActiveTab] = useState<Tab>('yes');
@@ -15,12 +15,11 @@ export default function Saved() {
   const [isDishFormModalOpen, setIsDishFormModalOpen] = useState(false);
 
   // 2. Hämta alla rätter OCH funktionen för att flytta dem från Context
-  const { dishes, updateDishStatus } = useDishContext();
+  const { dishes, userDishStatuses, updateDishStatus } = useDishContext();
 
  // Filtrerar fram rätterna baserat på vald flik och sökord
   const filteredDishes = dishes.filter(dish => {
-    // 1. Nu kollar vi BARA efter exakt matchning. 'repo' (slump-banken) visas inte här längre!
-    const matchesTab = dish.status === activeTab; 
+    const matchesTab = userDishStatuses[dish.id] === activeTab; 
     
     // 2. Sökfunktionen fungerar precis som innan
     const matchesSearch = dish.title.toLowerCase().includes(searchQuery.toLowerCase());
@@ -90,8 +89,8 @@ export default function Saved() {
             <Meh size={22} />
           </button>
           <button 
-            className={`tab-btn ${activeTab === 'blocked' ? 'active' : ''}`} 
-            onClick={() => setActiveTab('blocked')}
+            className={`tab-btn ${activeTab === 'no' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('no')}
             aria-label="Nej-listan"
           >
             <Trash size={22} />
@@ -117,11 +116,11 @@ export default function Saved() {
                   </button>
                 )}
                 
-                {/* 5. Klickar man på Kryss återställs rätten till 'repo' (så den rensas från listan) */}
+                {/* Ta bort användarens val så rätten blir osedd igen. */}
                 <button 
                   className="action-icon remove" 
                   aria-label="Ta bort"
-                  onClick={() => updateDishStatus(dish.id, 'repo')}
+                  onClick={() => updateDishStatus(dish.id, undefined)}
                 >
                   <X size={20} />
                 </button>

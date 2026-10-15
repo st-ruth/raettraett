@@ -1,11 +1,10 @@
-import type {Dish} from '../types/dish';
+import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan'; 
 
 export const dummyDishes: Dish[] = [
     {
         id: '1',
         title: 'korvstroganoff',
-        status: 'repo', 
         category: 'Husman',
         preferredDays: 'weekdays',
         proteinType: 'sausage',
@@ -14,7 +13,6 @@ export const dummyDishes: Dish[] = [
     {
         id: '2',
         title: 'Tacos',
-        status: 'repo',
         category: 'Mexikanskt',
         preferredDays: 'both',
         proteinType: 'mince',
@@ -24,7 +22,6 @@ export const dummyDishes: Dish[] = [
     {
         id: '3',
         title: 'högrevsgryta',
-        status: 'repo', 
         category: 'Husman',
         preferredDays: 'weekends',
         proteinType: 'stew',
@@ -34,7 +31,6 @@ export const dummyDishes: Dish[] = [
     {
         id: '4',
         title: 'köttfärssås',
-        status:'blocked',
         category: 'Husman',
         preferredDays: 'both',
         proteinType: 'mince',
@@ -44,7 +40,6 @@ export const dummyDishes: Dish[] = [
     {
         id: '5',
         title: 'korensk pulled tacos',
-        status: 'maybe',
         category: 'Asiatiskt',
         preferredDays: 'weekends',
         proteinType: 'pulled',
@@ -52,6 +47,13 @@ export const dummyDishes: Dish[] = [
         isSlowCooked: true
     }
 ]
+
+export const dummyDishStatuses: Record<string, DishStatus> = {
+  '1': 'yes',
+  '2': 'yes',
+  '4': 'no',
+  '5': 'maybe',
+};
 
 //------------------------------------------------------//
 

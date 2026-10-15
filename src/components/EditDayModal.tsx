@@ -12,43 +12,39 @@ interface EditDayModalProps {
 }
 
 export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayModalProps) {
-  const { dishes } = useDishContext();
+  const { dishes, userDishStatuses } = useDishContext();
   const [currentRecipes, setCurrentRecipes] = useState(day.recipes);
 
   if (!isOpen) return null;
 
   // Lägg till en slumpad rätt
   const handleAddRandomDish = () => {
-    const repoDishes = dishes.filter(d => d.status === 'repo');
-    const availableDishes = repoDishes.filter(
-      rd => !currentRecipes.some(cr => cr.id === rd.id)
-    );
+    const yesDishes = dishes.filter(dish => userDishStatuses[dish.id] === 'yes');
 
-    if (availableDishes.length === 0) {
-      alert('Du har inga fler lediga rätter att slumpa fram!');
+    if (yesDishes.length === 0) {
+      alert('Du har inga rätter i Ja-listan att slumpa fram!');
       return;
     }
 
-    const randomIndex = Math.floor(Math.random() * availableDishes.length);
-    const randomDish = availableDishes[randomIndex];
+    const randomIndex = Math.floor(Math.random() * yesDishes.length);
+    const randomDish = yesDishes[randomIndex];
 
     setCurrentRecipes([...currentRecipes, randomDish]);
   };
 
   // Byt ut en specifik rätt mot en ny slumpad
   const handleSwapDish = (indexToSwap: number) => {
-    const repoDishes = dishes.filter(d => d.status === 'repo');
-    const availableDishes = repoDishes.filter(
-      rd => !currentRecipes.some(cr => cr.id === rd.id)
+    const yesDishes = dishes.filter(dish =>
+      userDishStatuses[dish.id] === 'yes' && dish.id !== currentRecipes[indexToSwap]?.id
     );
 
-    if (availableDishes.length === 0) {
-      alert('Inga fler lediga rätter att byta till!');
+    if (yesDishes.length === 0) {
+      alert('Det finns ingen annan rätt i Ja-listan att byta till!');
       return;
     }
 
     // eslint-disable-next-line react-hooks/purity
-    const randomDish = availableDishes[Math.floor(Math.random() * availableDishes.length)];
+    const randomDish = yesDishes[Math.floor(Math.random() * yesDishes.length)];
     
     // Kopiera arrayen och byt ut just den rätten
     const newRecipes = [...currentRecipes];
@@ -58,8 +54,8 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
   };
 
   // Ta bort en rätt
-  const handleRemoveDish = (dishId: string) => {
-    setCurrentRecipes(currentRecipes.filter(dish => dish.id !== dishId));
+  const handleRemoveDish = (indexToRemove: number) => {
+    setCurrentRecipes(currentRecipes.filter((_, index) => index !== indexToRemove));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -103,7 +99,7 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
             {currentRecipes.length > 0 ? (
               <div className="planned-dishes">
                 {currentRecipes.map((dish, index) => (
-                  <div className="planned-dish" key={dish.id} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="planned-dish" key={`${dish.id}-${index}`} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ flex: 1 }}>{dish.title}</span>
 
                     <button
@@ -120,7 +116,7 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
                     <button
                       type="button"
                       className="remove-dish-btn"
-                      onClick={() => handleRemoveDish(dish.id)}
+                      onClick={() => handleRemoveDish(index)}
                       aria-label={`Ta bort ${dish.title}`}
                       title={`Ta bort ${dish.title}`}
                       style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex' }}

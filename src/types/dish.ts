@@ -1,6 +1,6 @@
 // ritningen av en rätt
 
-export type DishStatus = 'repo' | 'yes' | 'maybe' | 'blocked';  // repo- ligger i matrepon, yes -är vald in i kalendern 
+export type DishStatus = 'yes' | 'no' | 'maybe';
 export type PreferredDays = 'weekdays' | 'weekends' | 'both';
 export type ProteinType = 
 | 'mince' 
@@ -30,7 +30,6 @@ export type CarbType =
 export interface Dish {
     id: string;
     title: string;
-    status: DishStatus; 
     proteinType: ProteinType;
     preferredDays: PreferredDays;
     category?: string;
