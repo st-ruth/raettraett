@@ -24,4 +24,6 @@
   margin-top: 24px;
   width: 100%;
   max-width: 350px;
+  margin-inline: auto;
+  box-sizing: border-box;
 }

@@ -22,7 +22,7 @@ export default function Home() {
       </div>
       
       {/* 3. Vi skickar in den globalt valda rätten */}
-      <DishCard dish={currentDish} variant="hero">
+      <DishCard dish={currentDish ?? undefined} variant="hero">
         <div className="randomizer-actions">
           <button className="action-btn" onClick={randomizeDish}>
             fel rätt

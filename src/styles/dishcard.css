@@ -57,6 +57,7 @@
 .dish-card-actions {
   padding: 16px;
   width: 100%;
+  box-sizing: border-box;
   margin-top: auto; /* Trycker ner knapparna i botten på kortet */
 }
 

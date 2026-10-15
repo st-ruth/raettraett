@@ -1,8 +1,10 @@
-// här byggs mitt 30 dagars vy 
+// här byggs mitt 30 dagars vy
 
+import { useState } from 'react';
 import { X } from 'lucide-react';
 import '../styles/monthModal.css';
-import { mockMealPlan } from '../data/dummyData'; // 1. Hämta matsedeln härifrån!
+import { mockMealPlan } from '../data/dummyData';
+import EditDayModal from '../components/EditDayModal';
 
 interface MonthModalProps {
   onClose: () => void;
@@ -10,15 +12,18 @@ interface MonthModalProps {
 
 export default function MonthModal({ onClose }: MonthModalProps) {
   const today = new Date();
-  
+
+  // Håller reda på vilken dag som har klickats på
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+
   // Enkel formateringshjälp
   const formatDate = (d: Date) => d.toISOString().split('T')[0];
 
   const generateDays = () => {
     const days = [];
     const startDate = new Date(today);
-    
-    const dayOfWeek = startDate.getDay(); 
+
+    const dayOfWeek = startDate.getDay();
     const diffToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
     startDate.setDate(startDate.getDate() + diffToMonday);
 
@@ -27,6 +32,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
       currentDate.setDate(startDate.getDate() + i);
       days.push(currentDate);
     }
+
     return days;
   };
 
@@ -36,20 +42,26 @@ export default function MonthModal({ onClose }: MonthModalProps) {
   return (
     <div className="month-modal-overlay">
       <div className="month-modal-content">
-        
-        {/* Uppdaterad header som matchar din skiss */}
+
+        {/* Header */}
         <div className="month-modal-header">
-          <button className="close-btn" onClick={onClose} aria-label="Stäng">
-            <X size={24} />
-          </button>
-          
+          <span title="Låst matsedel" style={{ cursor: 'pointer' }}>
+            🔒
+          </span>
+
           <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <span style={{ cursor: 'pointer' }}>&lt;</span>
             <h2>v.39-v43</h2>
             <span style={{ cursor: 'pointer' }}>&gt;</span>
           </div>
 
-          <span title="Låst matsedel" style={{ cursor: 'pointer' }}>🔒</span>
+          <button
+            className="close-btn"
+            onClick={onClose}
+            aria-label="Stäng"
+          >
+            <X size={24} />
+          </button>
         </div>
 
         <div className="calendar-grid">
@@ -60,33 +72,54 @@ export default function MonthModal({ onClose }: MonthModalProps) {
           ))}
 
           {calendarDays.map((date, i) => {
-            const isPast = date < new Date(today.setHours(0, 0, 0, 0));
+            const isPast =
+              date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
             const isToday = date.toDateString() === new Date().toDateString();
             const currentDateString = formatDate(date);
-            const plannedDay = mockMealPlan.find(plan => plan.date === currentDateString);
+
+            const plannedDay = mockMealPlan.find(
+              plan => plan.date === currentDateString
+            );
 
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={`grid-cell ${isPast ? 'past-day' : ''} ${isToday ? 'today' : ''}`}
+                onClick={() => setSelectedDate(date)}
+                style={{ cursor: 'pointer' }}
               >
-                {/* Litet datum uppe i vänstra hörnet */}
+                {/* Datum */}
                 <span className="date-number">{date.getDate()}</span>
-                
-                {/* Rendera ut texten (som i din skiss) istället för emoji */}
+
+                {/* Visa dagens planerade mat */}
                 {!isPast && plannedDay && (
                   <>
                     {plannedDay.status === 'eating_out' ? (
-                      <span className="cell-dish-title" style={{ color: '#aaa' }}>BORTA</span>
+                      <span
+                        className="cell-dish-title"
+                        style={{ color: '#aaa' }}
+                      >
+                        BORTA
+                      </span>
                     ) : (
                       <span className="cell-dish-title">
                         {plannedDay.recipes[0]?.title}
                       </span>
                     )}
 
-                    {/* Nålen/Låset om rätten är låst */}
+                    {/* Låsmarkering */}
                     {plannedDay.status === 'locked' && (
-                      <span style={{ fontSize: '0.6rem', position: 'absolute', top: '2px', right: '2px' }}>📌</span>
+                      <span
+                        style={{
+                          fontSize: '0.6rem',
+                          position: 'absolute',
+                          top: '2px',
+                          right: '2px',
+                        }}
+                      >
+                        📌
+                      </span>
                     )}
                   </>
                 )}
@@ -94,15 +127,47 @@ export default function MonthModal({ onClose }: MonthModalProps) {
             );
           })}
         </div>
-        
-        {/* Den svarta bottenknappen från din skiss */}
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '24px' }}>
-            <button style={{ backgroundColor: '#111', color: '#fff', border: 'none', padding: '12px 32px', borderRadius: '4px', letterSpacing: '1px' }}>
-                SLUMPA NY
-            </button>
+
+        {/* Bottenknapp */}
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            marginTop: '24px',
+          }}
+        >
+          <button
+            style={{
+              backgroundColor: '#111',
+              color: '#fff',
+              border: 'none',
+              padding: '12px 32px',
+              borderRadius: '4px',
+              letterSpacing: '1px',
+            }}
+          >
+            SLUMPA NY
+          </button>
         </div>
 
       </div>
+
+      {/* Redigeringsmodalen visas när en dag klickas */}
+      {selectedDate && (
+  <EditDayModal
+    day={{
+      id: selectedDate.toISOString(),
+      date: formatDate(selectedDate),
+      dayOfWeek: selectedDate.toLocaleDateString('sv-SE', {
+        weekday: 'long',
+      }),
+      status: 'generated',
+      recipes: [],
+    }}
+    isOpen={true}
+    onClose={() => setSelectedDate(null)}
+  />
+)}
     </div>
   );
 }

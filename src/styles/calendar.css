@@ -131,6 +131,32 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* Den ruta som vi tittar på i listan just nu (Infinity Scroll markören) */
+.strip-box.scrolled-active {
+  border: 2px solid var(--text-color, #111);
+  background-color: var(--color-inactive, rgba(255, 255, 255, 0.2)); 
+  transform: scale(1.05); /* En liten förstoring för att tydliggöra */
+  transition: all 0.2s ease;
+}
+
+/* Bokstaven för veckodagen (oförändrad från tidigare) */
+.day-letter {
+  font-size: 0.75rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  margin-bottom: auto;
+}
+
+/* Om dagen är det faktiska datumet "idag", fyll cirkeln (oförändrad) */
+.day-letter.is-today {
+  background-color: var(--text-color, #111);
+  color: var(--bg-color, #fff);
+}
+
 /* Desktop-justeringar (Tablets och datorer) */
 @media (min-width: 768px) {
   .sticky-month-btn {
@@ -150,7 +176,7 @@
     padding-inline: 24px;
   }
 
-  .calendar-cards-container > .dish-card {
+  .calendar-cards-container .dish-card {
     max-width: none;
   }
 
