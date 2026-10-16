@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
@@ -56,7 +56,6 @@ const generateFullPlan = (
   return [...historyDays, ...upcomingDays];
 };
 
-
 export function DishProvider({ children }: { children: ReactNode }) {
   const [dishes, setDishes] = useState<Dish[]>(dummyDishes);
   const [userDishStatuses, setUserDishStatuses] = useState<Record<string, DishStatus>>(dummyDishStatuses);
@@ -64,6 +63,18 @@ export function DishProvider({ children }: { children: ReactNode }) {
   const [currentDish, setCurrentDish] = useState<Dish | null>(
     () => dummyDishes.find(dish => !dummyDishStatuses[dish.id]) ?? null
   );
+
+  // --- NY KOD: Anropar din backend när appen startar ---
+  useEffect(() => {
+    fetch('http://localhost:3000/api/dishes')
+      .then(response => response.json())
+      .then(data => {
+        console.log("Svar från backend:", data);
+        // När du ser att rätterna dyker upp i konsolen, ta bort "//" på raden under!
+        setDishes(data); 
+      })
+      .catch(error => console.error("Kunde inte nå backend:", error));
+  }, []);
 
   // --- LAZY INITIALIZATION ---
   // Genom att skicka in en pilfunktion här, körs den bara EN gång vid start.
@@ -160,7 +171,6 @@ export function DishProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // Vår Slumpa-knapp anropar nu bara hjälpfunktionen!
   const randomizeMealPlan = () => {
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {

@@ -1,13 +1,18 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'fs';
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/test', (req, res) => {
-  res.json({ message: "Hej från din TypeScript-backend! 🥳" });
+app.get('/api/dishes', (req, res) => {
+  // Läs filen
+  const data = fs.readFileSync('./dishes.json', 'utf-8');
+  // Översätt från text till kod och skicka
+  const dishes = JSON.parse(data);
+  res.json(dishes);
 });
 
 const PORT = 3000;
