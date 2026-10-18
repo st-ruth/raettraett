@@ -3,10 +3,29 @@ import type { ReactNode } from 'react';
 import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';
-import { dummyDishes, dummyDishStatuses, mockMealPlan } from '../data/dummyData';
+
+const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
+const proteinOptions = [
+  'mince', 'chicken', 'sausage', 'meat', 'pork', 'fish', 'stew',
+  'soup', 'cheese', 'egg', 'mushroom', 'pulled', 'legumes', 'other',
+] as const;
+
+const isDish = (value: unknown): value is Dish =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  'id' in value &&
+  typeof value.id === 'string' &&
+  value.id.trim().length > 0 &&
+  'title' in value &&
+  typeof value.title === 'string' &&
+  value.title.trim().length > 0 &&
+  'preferredDays' in value &&
+  preferredDayOptions.some(option => option === value.preferredDays) &&
+  'proteinType' in value &&
+  proteinOptions.some(option => option === value.proteinType);
 
 // --- HJÄLPFUNKTION: Bygger ut matsedeln till 35 dagar ---
-// Vi lägger den utanför så vi kan använda den både vid start och när man trycker "Slumpa Ny"
 const generateFullPlan = (
   currentPlan: MealPlanDay[],
   availableDishes: Dish[],
@@ -57,12 +76,15 @@ const generateFullPlan = (
 };
 
 export function DishProvider({ children }: { children: ReactNode }) {
-  const [dishes, setDishes] = useState<Dish[]>(dummyDishes);
-  const [userDishStatuses, setUserDishStatuses] = useState<Record<string, DishStatus>>(dummyDishStatuses);
+  // STARTAR SOM EN TOM LISTA INNAN BACKEND SVARAR!
+  const [dishes, setDishes] = useState<Dish[]>([]);
+  
+  // Startar med tomma statusar istället för dummyDishStatuses
+  const [userDishStatuses, setUserDishStatuses] = useState<Record<string, DishStatus>>({});
   const userDishStatusesRef = useRef(userDishStatuses);
-  const [currentDish, setCurrentDish] = useState<Dish | null>(
-    () => dummyDishes.find(dish => !dummyDishStatuses[dish.id]) ?? null
-  );
+  
+  // Startar med tom aktuell rätt innan backend svarar
+  const [currentDish, setCurrentDish] = useState<Dish | null>(null);
 
   // --- NY KOD: Anropar din backend när appen startar ---
   useEffect(() => {
@@ -70,17 +92,20 @@ export function DishProvider({ children }: { children: ReactNode }) {
       .then(response => response.json())
       .then(data => {
         console.log("Svar från backend:", data);
-        // När du ser att rätterna dyker upp i konsolen, ta bort "//" på raden under!
         setDishes(data); 
+        
+        // När datan laddats in från servern väljer vi en första rätt att visa på Slumpa-sidan
+        const unseenDishes = data.filter((dish: Dish) => !userDishStatusesRef.current[dish.id]);
+        if (unseenDishes.length > 0) {
+           setCurrentDish(unseenDishes[0]);
+        }
       })
       .catch(error => console.error("Kunde inte nå backend:", error));
   }, []);
 
-  // --- LAZY INITIALIZATION ---
-  // Genom att skicka in en pilfunktion här, körs den bara EN gång vid start.
-  // Appen får 35 dagar direkt, ingen useEffect behövs!
+  // Vi startar med en helt tom 35-dagarsplan istället för mockMealPlan
   const [mealPlan, setMealPlan] = useState<MealPlanDay[]>(() => {
-    return generateFullPlan(mockMealPlan, dummyDishes, dummyDishStatuses);
+    return generateFullPlan([], [], {});
   });
 
   const updateDishStatus = (id: string, newStatus: DishStatus | undefined) => {
@@ -108,16 +133,41 @@ export function DishProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addDish = (newDish: Omit<Dish, 'id'>) => {
+  const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish> => {
     const dish: Dish = {
       ...newDish,
       id: crypto.randomUUID(),
     };
+    
+    const response = await fetch('http://localhost:3000/api/dishes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(dish)
+    });
 
-    setDishes(prevDishes => [dish, ...prevDishes]);
-    const nextStatuses = { ...userDishStatusesRef.current, [dish.id]: 'yes' as const };
+    const responseBody: unknown = await response.json().catch(() => undefined);
+    if (!response.ok) {
+      const message =
+        typeof responseBody === 'object' &&
+        responseBody !== null &&
+        'error' in responseBody &&
+        typeof responseBody.error === 'string'
+          ? responseBody.error
+          : `Kunde inte spara maträtten (HTTP ${response.status}).`;
+      throw new Error(message);
+    }
+
+    if (!isDish(responseBody)) {
+      throw new Error('Backend skickade ett ogiltigt svar när maträtten sparades.');
+    }
+
+    setDishes(prevDishes => [responseBody, ...prevDishes]);
+    const nextStatuses = { ...userDishStatusesRef.current, [responseBody.id]: 'yes' as const };
     userDishStatusesRef.current = nextStatuses;
     setUserDishStatuses(nextStatuses);
+    return responseBody;
   };
 
   const randomizeDish = () => {

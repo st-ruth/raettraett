@@ -1,4 +1,4 @@
-import { useId } from 'react';
+import { useId, useState } from 'react';
 import { X, Clock, Hourglass } from 'lucide-react';
 import { useDishContext } from '../context/useDishContext';
 import type { CarbType, Dish, PreferredDays, ProteinType } from '../types/dish';
@@ -27,13 +27,19 @@ interface DishFormModalProps {
 
 export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
   const { addDish } = useDishContext();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const titleId = useId();
-  const dialogRef = useAccessibleModal(isOpen, onClose);
+  const handleClose = () => {
+    if (!isSaving) onClose();
+  };
+  const dialogRef = useAccessibleModal(isOpen, handleClose);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSaving) return;
 
     const formData = new FormData(event.currentTarget);
     const title = formData.get('title');
@@ -73,14 +79,26 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
       dish.isSlowCooked = true;
     }
 
-    addDish(dish);
-    onClose();
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      await addDish(dish);
+      onClose();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : 'Det gick inte att spara maträtten. Försök igen.'
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Förhindra att sidan i bakgrunden scrollas när modalen är öppen
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
+    if (e.target === e.currentTarget && !isSaving) {
+      handleClose();
     }
   };
 
@@ -98,7 +116,7 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
         
         <div className="modal-header">
           <h2 id={titleId}>Skapa ny maträtt</h2>
-          <button type="button" className="close-btn" onClick={onClose} aria-label="Stäng">
+          <button type="button" className="close-btn" onClick={handleClose} aria-label="Stäng" disabled={isSaving}>
             <X size={24} aria-hidden="true" />
           </button>
         </div>
@@ -187,9 +205,12 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
         </fieldset>
 
           <div className="form-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>Avbryt</button>
-            <button type="submit" className="btn-primary">Spara</button>
+            <button type="button" className="btn-secondary" onClick={handleClose} disabled={isSaving}>Avbryt</button>
+            <button type="submit" className="btn-primary" disabled={isSaving}>
+              {isSaving ? 'Sparar...' : 'Spara'}
+            </button>
           </div>
+          {saveError && <p role="alert">{saveError}</p>}
           <p className="required-fields-note">*Obligatoriska fält</p>
         </form>
 

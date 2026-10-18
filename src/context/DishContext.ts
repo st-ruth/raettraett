@@ -9,7 +9,7 @@ export interface DishContextType {
   userDishStatuses: Record<string, DishStatus>;
   currentDish: Dish | null; 
   randomizeDish: () => void;
-  addDish: (newDish: Omit<Dish, 'id'>) => void;
+  addDish: (newDish: Omit<Dish, 'id'>) => Promise<Dish>;
   updateDishStatus: (id: string, newStatus: DishStatus | undefined) => void;
   mealPlan: MealPlanDay[];
   updateMealPlanDay: (updatedDay: MealPlanDay) => void;
