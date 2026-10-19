@@ -160,21 +160,44 @@ export default function Saved() {
             <DishCard key={dish.id} dish={dish} variant="calendar">
               
               <div className="compact-actions">
-                {activeTab === 'maybe' && (
-                  <button 
+                {activeTab !== 'yes' && (
+                  <button
                     type="button"
-                    className="action-icon add" 
+                    className="action-icon status-action"
                     aria-label="Flytta till Ja-listan"
+                    title="Flytta till Ja-listan"
                     onClick={() => updateDishStatus(dish.id, 'yes')}
                   >
-                    <Plus size={20} aria-hidden="true" />
+                    <Smile size={20} aria-hidden="true" />
                   </button>
                 )}
-                
-                <button 
+                {activeTab !== 'maybe' && (
+                  <button
+                    type="button"
+                    className="action-icon status-action"
+                    aria-label="Flytta till Kanske-listan"
+                    title="Flytta till Kanske-listan"
+                    onClick={() => updateDishStatus(dish.id, 'maybe')}
+                  >
+                    <Meh size={20} aria-hidden="true" />
+                  </button>
+                )}
+                {activeTab !== 'no' && (
+                  <button
+                    type="button"
+                    className="action-icon status-action"
+                    aria-label="Flytta till Nej-listan"
+                    title="Flytta till Nej-listan"
+                    onClick={() => updateDishStatus(dish.id, 'no')}
+                  >
+                    <Trash size={20} aria-hidden="true" />
+                  </button>
+                )}
+                <button
                   type="button"
-                  className="action-icon remove" 
-                  aria-label={`Ta bort ${dish.title} från listan`}
+                  className="action-icon remove"
+                  aria-label={`Ta bort ${dish.title} helt från listan`}
+                  title="Ta bort helt från listan"
                   onClick={() => updateDishStatus(dish.id, undefined)}
                 >
                   <X size={20} aria-hidden="true" />
