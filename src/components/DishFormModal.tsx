@@ -82,7 +82,8 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
     setIsSaving(true);
     setSaveError(null);
     try {
-      await addDish(dish);
+      const savedDish = await addDish(dish);
+      if (!savedDish) return;
       onClose();
     } catch (error) {
       setSaveError(

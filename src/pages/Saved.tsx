@@ -2,6 +2,8 @@ import { useState } from 'react';
 import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
+import { useAuth } from '../context/useAuth';
+import { AUTH_REQUIRED_MESSAGE } from '../context/AuthContext';
 import { useDishFilter } from '../hooks/useDishFilter';
 import type { ProteinType } from '../types/dish'; // <-- Linter fix: Importerar ProteinType
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock } from 'lucide-react';
@@ -16,6 +18,7 @@ export default function Saved() {
   const [isDishFormModalOpen, setIsDishFormModalOpen] = useState(false);
 
   const { dishes, userDishStatuses, updateDishStatus } = useDishContext();
+  const { requireAuth } = useAuth();
 
   const baseFilteredDishes = dishes.filter(dish => {
     const matchesTab = userDishStatuses[dish.id] === activeTab; 
@@ -63,7 +66,9 @@ export default function Saved() {
           <button
             type="button"
             className="add-dish-btn"
-            onClick={() => setIsDishFormModalOpen(true)}
+            onClick={() => {
+              if (requireAuth(AUTH_REQUIRED_MESSAGE)) setIsDishFormModalOpen(true);
+            }}
           >
             <Plus size={20} aria-hidden="true" />
             Lägg till maträtt

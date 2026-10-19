@@ -1,16 +1,21 @@
 /*headers styleing*/
 .header-container {
+  position: relative;
   padding: 16px;
- 
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
+.header-brand-control {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px; /* Skapar ett lagom mellanrum mellan cirkeln och texten */
 }
 
 .header-left p {
@@ -41,4 +46,86 @@
 .mode-icon {
   width: 24px;
   height: 24px;
+}
+
+/* Ersätter inline-stylen för att hålla koden ren */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-email-display {
+  display: none;
+  align-items: center;
+  gap: 5px;
+  max-width: min(35vw, 320px);
+  height: 44px;
+  padding: 0 14px;
+  overflow: hidden;
+  border-radius: 999px;
+  background-color: var(--color-inactive);
+  color: var(--color-ui);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.user-email-label {
+  flex-shrink: 0;
+  font-weight: var(--font-weight-light);
+}
+
+.user-email-display > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email-display:hover {
+  background-color: var(--color-active);
+}
+
+@media (min-width: 768px) {
+  .header-brand-control > .mode-button {
+    order: -1;
+  }
+
+  .user-email-display {
+    display: inline-flex;
+  }
+}
+
+@media (max-width: 767px) {
+  .header-brand-control {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .header-left p {
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+  }
+
+  .header-user {
+    position: static;
+  }
+
+  .user-email-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: inline-flex;
+    max-width: min(55vw, 320px);
+    font-size: 0.75rem;
+    transform: translate(-50%, -50%);
+  }
 }

@@ -3,6 +3,8 @@ import type { PropsWithChildren } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { DishProvider } from '../src/context/DishProvider';
+import { AuthContext, AUTH_REQUIRED_MESSAGE } from '../src/context/AuthContext';
+import type { AuthContextType } from '../src/context/AuthContext';
 import { useDishContext } from '../src/context/useDishContext';
 import { useDishFilter } from '../src/hooks/useDishFilter';
 import type { Dish } from '../src/types/dish';
@@ -18,6 +20,14 @@ jest.unstable_mockModule('lucide-react', () => ({
 const { default: Home } = await import('../src/pages/Home');
 
 const endpoint = 'http://localhost:3000/api/dishes';
+const authenticatedTestContext: AuthContextType = {
+  user: null,
+  loading: false,
+  signOut: async () => {},
+  authPrompt: null,
+  requireAuth: () => true,
+  clearAuthPrompt: () => {},
+};
 
 const originalFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
 let fetchMock: jest.MockedFunction<typeof fetch>;
@@ -102,10 +112,12 @@ describe('rättRätt-enhetstester', () => {
 
     render(
       <MemoryRouter>
-        <DishProvider>
-          <Home />
-          <TestControls />
-        </DishProvider>
+        <AuthContext.Provider value={authenticatedTestContext}>
+          <DishProvider>
+            <Home />
+            <TestControls />
+          </DishProvider>
+        </AuthContext.Provider>
       </MemoryRouter>,
     );
 
@@ -140,7 +152,9 @@ describe('rättRätt-enhetstester', () => {
       });
 
     const wrapper = ({ children }: PropsWithChildren) => (
-      <DishProvider>{children}</DishProvider>
+      <AuthContext.Provider value={authenticatedTestContext}>
+        <DishProvider>{children}</DishProvider>
+      </AuthContext.Provider>
     );
     const { result } = renderHook(() => useDishContext(), { wrapper });
     let createdDish: Dish | undefined;
@@ -173,5 +187,37 @@ describe('rättRätt-enhetstester', () => {
       ...newDish,
       id: createdDish.id,
     });
+  });
+
+  it('stoppar sparning och begär inloggning för en utloggad besökare', async () => {
+    const requestLogin = jest.fn(() => false);
+    const unauthenticatedContext: AuthContextType = {
+      ...authenticatedTestContext,
+      requireAuth: requestLogin,
+    };
+    fetchMock.mockResolvedValueOnce(jsonResponse([]));
+
+    const wrapper = ({ children }: PropsWithChildren) => (
+      <AuthContext.Provider value={unauthenticatedContext}>
+        <DishProvider>{children}</DishProvider>
+      </AuthContext.Provider>
+    );
+    const { result } = renderHook(() => useDishContext(), { wrapper });
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+    let savedDish: Dish | null = null;
+    await act(async () => {
+      savedDish = await result.current.addDish({
+        title: 'Gästmat',
+        proteinType: 'fish',
+        preferredDays: 'weekends',
+      });
+    });
+
+    expect(savedDish).toBeNull();
+    expect(requestLogin).toHaveBeenCalledWith(AUTH_REQUIRED_MESSAGE);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

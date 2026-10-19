@@ -1,0 +1,56 @@
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form .form-group input[type="email"],
+.auth-form .form-group input[type="password"] {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  background-color: var(--color-ui-transparent);
+  color: var(--color-white);
+  font-size: 1rem;
+}
+
+.auth-form .form-group input[type="email"]:focus,
+.auth-form .form-group input[type="password"]:focus {
+  outline: none;
+  border-color: var(--color-white);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.auth-form .form-group input[type="email"]:focus-visible,
+.auth-form .form-group input[type="password"]:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.auth-form .form-group input[type="email"]::placeholder,
+.auth-form .form-group input[type="password"]::placeholder {
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.auth-submit {
+  margin-top: 10px;
+}
+
+.auth-submit-login {
+  text-transform: uppercase;
+}
+
+.auth-mode-toggle {
+  margin: 10px 0 0;
+  cursor: pointer;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.auth-message {
+  margin: 16px 0 0;
+  color: var(--color-white);
+  font-weight: var(--font-weight-light);
+  text-align: center;
+}

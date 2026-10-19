@@ -3,6 +3,8 @@ import { LockKeyhole, X, MessageSquareMore } from 'lucide-react';
 import '../styles/modal.css';
 import EditDayModal from '../components/EditDayModal';
 import { useDishContext } from '../context/useDishContext';
+import { useAuth } from '../context/useAuth';
+import { AUTH_REQUIRED_MESSAGE } from '../context/AuthContext';
 import type { MealPlanDay } from '../types/mealPlan';
 import { useAccessibleModal } from '../hooks/useAccessibleModal';
 
@@ -16,6 +18,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
   const dialogRef = useAccessibleModal(true, onClose);
 
   const { mealPlan, updateMealPlanDay, randomizeMealPlan } = useDishContext(); 
+  const { requireAuth } = useAuth();
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
@@ -111,7 +114,9 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                 type="button"
                 key={i}
                 className={`grid-cell ${isPast ? 'past-day' : ''} ${isToday ? 'today' : ''}`}
-                onClick={() => setSelectedDate(date)}
+                onClick={() => {
+                  if (requireAuth(AUTH_REQUIRED_MESSAGE)) setSelectedDate(date);
+                }}
                 aria-label={`${date.toLocaleDateString('sv-SE', {
                   weekday: 'long',
                   day: 'numeric',

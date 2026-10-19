@@ -7,20 +7,23 @@ import Saved from './pages/Saved';
 
 import { DishProvider } from './context/DishProvider';
 import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthProvider';
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <DishProvider>
-        <Routes>
-          <Route path="/" element={<Layout />}>
-            <Route index element={<Home />} />
-            <Route path="slumpa" element={<Randomizer />} />
-            <Route path="kalender" element={<Calendar />} />
-            <Route path="sparat" element={<Saved />} />
-          </Route>
-        </Routes>
-      </DishProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <DishProvider>
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
+              <Route path="slumpa" element={<Randomizer />} />
+              <Route path="kalender" element={<Calendar />} />
+              <Route path="sparat" element={<Saved />} />
+            </Route>
+          </Routes>
+        </DishProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }

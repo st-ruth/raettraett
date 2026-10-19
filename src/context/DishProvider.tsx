@@ -3,6 +3,8 @@ import type { ReactNode } from 'react';
 import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';
+import { useAuth } from './useAuth';
+import { AUTH_REQUIRED_MESSAGE } from './AuthContext';
 
 const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
 const proteinOptions = [
@@ -76,6 +78,7 @@ const generateFullPlan = (
 };
 
 export function DishProvider({ children }: { children: ReactNode }) {
+  const { requireAuth } = useAuth();
   // STARTAR SOM EN TOM LISTA INNAN BACKEND SVARAR!
   const [dishes, setDishes] = useState<Dish[]>([]);
   
@@ -109,6 +112,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
   });
 
   const updateDishStatus = (id: string, newStatus: DishStatus | undefined) => {
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+
     const nextStatuses = { ...userDishStatusesRef.current };
     if (newStatus) {
       nextStatuses[id] = newStatus;
@@ -133,7 +138,9 @@ export function DishProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish> => {
+  const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return null;
+
     const dish: Dish = {
       ...newDish,
       id: crypto.randomUUID(),
@@ -181,6 +188,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMealPlanDay = (updatedDay: MealPlanDay) => {
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+
     setMealPlan(prevPlan => {
       const dayExists = prevPlan.some(day => day.date === updatedDay.date);
       if (dayExists) {
@@ -192,6 +201,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const randomizeMealPlanDay = (date: string) => {
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
       alert('Du har inga rätter i Ja-listan att slumpa fram!');
@@ -222,6 +233,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const randomizeMealPlan = () => {
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
       alert('Du har inga rätter i Ja-listan att slumpa fram!');
