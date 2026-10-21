@@ -9,7 +9,7 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-  origin: ['https://raettraett.netlify.app', 'http://localhost:5173', 'https://raettraett-5yn7.vercel.app'],
+  origin: ['https://raettraett.netlify.app', 'http://localhost:5173', 'https://rattratt.vercel.app'],
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Authorization', 'Content-Type'],
 }));
