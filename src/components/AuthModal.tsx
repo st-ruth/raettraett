@@ -69,7 +69,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="namn@exempel.se"
+              placeholder="namn@example.se"
               autoComplete="off"
               required
             />

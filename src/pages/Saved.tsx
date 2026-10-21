@@ -3,7 +3,6 @@ import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
-import { AUTH_REQUIRED_MESSAGE } from '../context/AuthContext';
 import { useDishFilter } from '../hooks/useDishFilter';
 import type { DishStatus, ProteinType } from '../types/dish'; // <-- Linter fix: Importerar ProteinType
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock } from 'lucide-react';
@@ -17,7 +16,14 @@ export default function Saved() {
   const [showFilters, setShowFilters] = useState(false);
   const [isDishFormModalOpen, setIsDishFormModalOpen] = useState(false);
 
-  const { dishes, userDishStatuses, updateDishStatus, dishesLoading, dishesError } = useDishContext();
+  const {
+    dishes,
+    userDishStatuses,
+    updateDishStatus,
+    clearDishActionNotice,
+    dishesLoading,
+    dishesError,
+  } = useDishContext();
   const { requireAuth } = useAuth();
 
   const baseFilteredDishes = useMemo(() => dishes.filter(dish => {
@@ -124,7 +130,10 @@ export default function Saved() {
             type="button"
             className="add-dish-btn"
             onClick={() => {
-              if (requireAuth(AUTH_REQUIRED_MESSAGE)) setIsDishFormModalOpen(true);
+              clearDishActionNotice();
+              if (requireAuth('Du måste logga in för att lägga till maträtt.')) {
+                setIsDishFormModalOpen(true);
+              }
             }}
           >
             <Plus size={20} aria-hidden="true" />

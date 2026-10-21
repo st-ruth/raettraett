@@ -334,7 +334,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
 
   const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
     setDishActionNotice(null);
-    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return null;
+    if (!requireAuth('Du måste logga in för att lägga till maträtt.')) return null;
     if (!user) {
       return null;
     }

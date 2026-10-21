@@ -26,6 +26,9 @@ jest.unstable_mockModule('lucide-react', () => ({
   ChevronRight: () => null,
   LockKeyhole: () => null,
   Trash2: () => null,
+  Trash: () => null,
+  Plus: () => null,
+  SlidersHorizontal: () => null,
   MessageSquareMore: () => null,
   Clock: () => null,
   Ghost: () => null,
@@ -40,6 +43,7 @@ const { default: Randomizer } = await import('../src/pages/Randomizer');
 const { default: AuthModal } = await import('../src/components/AuthModal');
 const { default: Header } = await import('../src/components/Header');
 const { default: CalendarPage } = await import('../src/pages/Calendar');
+const { default: Saved } = await import('../src/pages/Saved');
 
 const testUser = {
   id: 'test-user-id',
@@ -80,6 +84,35 @@ function HeaderAuthHarness() {
         <MemoryRouter>
           <Header />
           <button type="button" onClick={() => setUser(testUser)}>Simulera lyckad inloggning</button>
+        </MemoryRouter>
+      </ThemeContext.Provider>
+    </AuthContext.Provider>
+  );
+}
+
+function AuthPromptHarness({ children }: PropsWithChildren) {
+  const [authPrompt, setAuthPrompt] = useState<string | null>(null);
+  const requireAuth = useCallback((message: string) => {
+    setAuthPrompt(message);
+    return false;
+  }, []);
+  const value: AuthContextType = {
+    user: null,
+    loading: false,
+    signOut: async () => {},
+    authPrompt,
+    requireAuth,
+    clearAuthPrompt: () => setAuthPrompt(null),
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      <ThemeContext.Provider value={{ theme: 'light', toggleTheme: () => {} }}>
+        <MemoryRouter>
+          <DishProvider>
+            <Header />
+            {children}
+          </DishProvider>
         </MemoryRouter>
       </ThemeContext.Provider>
     </AuthContext.Provider>
@@ -231,6 +264,12 @@ describe('rättRätt-enhetstester', () => {
       isOpen ? <AuthModal isOpen onClose={onClose} /> : null;
     const { rerender } = render(renderAuthModal(true));
 
+    expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('');
+    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@example.se');
+    expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
+    expect(screen.getByLabelText('E-post').getAttribute('autocomplete')).toBe('off');
+    expect(screen.getByLabelText('Lösenord').getAttribute('autocomplete')).toBe('off');
+    expect(document.querySelector('form.auth-form')?.getAttribute('autocomplete')).toBe('off');
     fireEvent.change(screen.getByLabelText('E-post'), {
       target: { value: 'gammal@exempel.se' },
     });
@@ -243,11 +282,13 @@ describe('rättRätt-enhetstester', () => {
     fireEvent.click(screen.getByText('Har du inget konto? Skapa ett här.'));
     expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
     expect(screen.getByRole('heading', { name: 'Skapa konto' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Registrera dig' }));
+    expect(await screen.findByText('Konto skapat! Du är nu inloggad.')).toBeTruthy();
 
     rerender(renderAuthModal(false));
     rerender(renderAuthModal(true));
     expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('');
-    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@exempel.se');
+    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@example.se');
     expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
     expect(screen.getByRole('heading', { name: 'Logga in' })).toBeTruthy();
 
@@ -280,9 +321,63 @@ describe('rättRätt-enhetstester', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Logga in' }));
 
     expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('');
-    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@exempel.se');
+    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@example.se');
     expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
     expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
+  });
+
+  it('visar bara meddelandet om inloggning krävs för att lägga till en maträtt', async () => {
+    render(
+      <AuthPromptHarness>
+        <Saved />
+      </AuthPromptHarness>,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: /Lägg till maträtt/ }));
+
+    const message = await screen.findByText('Du måste logga in för att lägga till maträtt.', {
+      selector: '.auth-info-notice',
+    });
+    expect(message).toBeTruthy();
+    expect(screen.getAllByText('Du måste logga in för att lägga till maträtt.')).toHaveLength(1);
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1);
+  });
+
+  it('visar bara meddelandet om inloggning krävs för slumpgeneratorn', async () => {
+    render(
+      <AuthPromptHarness>
+        <Randomizer />
+      </AuthPromptHarness>,
+    );
+
+    expect(await screen.findByText('JSON-rätt')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, spara rätten som ja' }));
+
+    const message = await screen.findByText('Du måste logga in för att testa slumpgeneratorn!', {
+      selector: '.auth-info-notice',
+    });
+    expect(message).toBeTruthy();
+    expect(screen.getAllByText('Du måste logga in för att testa slumpgeneratorn!')).toHaveLength(1);
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1);
+  });
+
+  it('ersätter en tidigare inloggningsprompt när en annan funktion begär inloggning', async () => {
+    render(
+      <AuthPromptHarness>
+        <Saved />
+        <Randomizer />
+      </AuthPromptHarness>,
+    );
+
+    expect(await screen.findByText('JSON-rätt')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: /Lägg till maträtt/ }));
+    expect(await screen.findByText('Du måste logga in för att lägga till maträtt.')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Stäng' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, spara rätten som ja' }));
+    expect(await screen.findByText('Du måste logga in för att testa slumpgeneratorn!')).toBeTruthy();
+    expect(screen.queryByText('Du måste logga in för att lägga till maträtt.')).toBeNull();
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1);
   });
 
   it('visar automatisk inloggning först efter autentisering och öppnar igen vid återbesök', async () => {
@@ -599,6 +694,6 @@ describe('rättRätt-enhetstester', () => {
     });
 
     expect(savedDish).toBeNull();
-    expect(requestLogin).toHaveBeenCalledWith(AUTH_REQUIRED_MESSAGE);
+    expect(requestLogin).toHaveBeenCalledWith('Du måste logga in för att lägga till maträtt.');
   });
 });

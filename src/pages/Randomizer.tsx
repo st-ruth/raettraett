@@ -1,15 +1,28 @@
 import { Smile, Meh, Angry } from 'lucide-react';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
+import { useAuth } from '../context/useAuth';
 import type { DishStatus } from '../types/dish';
 import '../styles/actionButtons.css'; // Din styling bevarad!
 import '../styles/randomizer.css'; 
 
 export default function Randomizer() {
-  const { dishes, currentDish, randomizeDish, updateDishStatus, dishesLoading, dishesError } = useDishContext();
+  const {
+    dishes,
+    currentDish,
+    randomizeDish,
+    updateDishStatus,
+    clearDishActionNotice,
+    dishesLoading,
+    dishesError,
+  } = useDishContext();
+  const { requireAuth } = useAuth();
 
   // Tar nu emot engelska statusar för att matcha databasen
   const handleAction = (newStatus: DishStatus) => {
+    clearDishActionNotice();
+    if (!requireAuth('Du måste logga in för att testa slumpgeneratorn!')) return;
+
     if (currentDish) {
       void updateDishStatus(currentDish.id, newStatus).then(succeeded => {
         if (succeeded) randomizeDish();

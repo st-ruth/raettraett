@@ -119,9 +119,14 @@
     position: static;
   }
 
+  .header-actions > .mode-button,
+  .header-user > .mode-button {
+    transform: translateY(3px);
+  }
+
   .user-email-display {
     position: absolute;
-    top: 50%;
+    top: calc(50% + 3px);
     left: 50%;
     display: inline-flex;
     max-width: min(55vw, 320px);
