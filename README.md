@@ -26,6 +26,7 @@ rättRätt är en middagsplanerare där användare kan hitta maträtter, slumpa 
 ## Starta lokalt
 
 Du behöver Node.js och npm.
+Vid lokal utveckling krävs miljövariabler för Supabase-anslutningen och backendens API-adress. Inga nyckelvärden eller hemligheter ingår i repot.
 
 **1. Starta backend** i en terminal:
 
