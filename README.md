@@ -2,13 +2,13 @@
 
 rättRätt är en middagsplanerare där användare kan hitta maträtter, slumpa fram en matsedel, spara personliga val och lägga till egna maträtter som delas med andra användare.
 
-**App:** [rättRätt](https://raettraett.netlify.app/)
+**App:** [rättRätt – kalender](https://app-tau-nine-19.vercel.app/kalender)
 **Backend API:** [Hämta maträtter](https://raettraett-api.onrender.com/api/dishes)
 **GitHub:** [Projektets repository](https://github.com/st-ruth/raettraett)
 
 ## Tekniker
 
-React, TypeScript, Vite, Node.js, Express, Supabase, Jest och React Testing Library. Frontend är publicerad på Netlify och backend på Render.
+React, TypeScript, Vite, Node.js, Express, Supabase, Jest och React Testing Library. Frontend är publicerad på Vercel och backend på Render.
 
 ## Funktioner
 
