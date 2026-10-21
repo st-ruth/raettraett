@@ -1,11 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
 import { AUTH_REQUIRED_MESSAGE } from '../context/AuthContext';
 import { useDishFilter } from '../hooks/useDishFilter';
-import type { ProteinType } from '../types/dish'; // <-- Linter fix: Importerar ProteinType
+import type { DishStatus, ProteinType } from '../types/dish'; // <-- Linter fix: Importerar ProteinType
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock } from 'lucide-react';
 import '../styles/saved.css';
 
@@ -35,6 +35,63 @@ export default function Saved() {
     quickFilter,
     setQuickFilter
   } = useDishFilter(baseFilteredDishes);
+
+  const handleDishStatusChange = useCallback(
+    (dishId: string, status: DishStatus | undefined) => {
+      void updateDishStatus(dishId, status);
+    },
+    [updateDishStatus]
+  );
+
+  const actionsByDish = useMemo(() => new Map(processedDishes.map(dish => [
+    dish.id,
+    (
+      <div className="compact-actions">
+        {activeTab !== 'yes' && (
+          <button
+            type="button"
+            className="action-icon status-action"
+            aria-label="Flytta till Ja-listan"
+            title="Flytta till Ja-listan"
+            onClick={() => handleDishStatusChange(dish.id, 'yes')}
+          >
+            <Smile size={20} aria-hidden="true" />
+          </button>
+        )}
+        {activeTab !== 'maybe' && (
+          <button
+            type="button"
+            className="action-icon status-action"
+            aria-label="Flytta till Kanske-listan"
+            title="Flytta till Kanske-listan"
+            onClick={() => handleDishStatusChange(dish.id, 'maybe')}
+          >
+            <Meh size={20} aria-hidden="true" />
+          </button>
+        )}
+        {activeTab !== 'no' && (
+          <button
+            type="button"
+            className="action-icon status-action"
+            aria-label="Flytta till Nej-listan"
+            title="Flytta till Nej-listan"
+            onClick={() => handleDishStatusChange(dish.id, 'no')}
+          >
+            <Trash size={20} aria-hidden="true" />
+          </button>
+        )}
+        <button
+          type="button"
+          className="action-icon remove"
+          aria-label={`Ta bort ${dish.title} helt från listan`}
+          title="Ta bort helt från listan"
+          onClick={() => handleDishStatusChange(dish.id, undefined)}
+        >
+          <X size={20} aria-hidden="true" />
+        </button>
+      </div>
+    ),
+  ] as const)), [processedDishes, activeTab, handleDishStatusChange]);
 
   return (
     <div className="saved-page">
@@ -164,52 +221,7 @@ export default function Saved() {
         ) : processedDishes.length > 0 ? (
           processedDishes.map(dish => (
             <DishCard key={dish.id} dish={dish} variant="calendar">
-              
-              <div className="compact-actions">
-                {activeTab !== 'yes' && (
-                  <button
-                    type="button"
-                    className="action-icon status-action"
-                    aria-label="Flytta till Ja-listan"
-                    title="Flytta till Ja-listan"
-                    onClick={() => updateDishStatus(dish.id, 'yes')}
-                  >
-                    <Smile size={20} aria-hidden="true" />
-                  </button>
-                )}
-                {activeTab !== 'maybe' && (
-                  <button
-                    type="button"
-                    className="action-icon status-action"
-                    aria-label="Flytta till Kanske-listan"
-                    title="Flytta till Kanske-listan"
-                    onClick={() => updateDishStatus(dish.id, 'maybe')}
-                  >
-                    <Meh size={20} aria-hidden="true" />
-                  </button>
-                )}
-                {activeTab !== 'no' && (
-                  <button
-                    type="button"
-                    className="action-icon status-action"
-                    aria-label="Flytta till Nej-listan"
-                    title="Flytta till Nej-listan"
-                    onClick={() => updateDishStatus(dish.id, 'no')}
-                  >
-                    <Trash size={20} aria-hidden="true" />
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className="action-icon remove"
-                  aria-label={`Ta bort ${dish.title} helt från listan`}
-                  title="Ta bort helt från listan"
-                  onClick={() => updateDishStatus(dish.id, undefined)}
-                >
-                  <X size={20} aria-hidden="true" />
-                </button>
-              </div>
-
+              {actionsByDish.get(dish.id)}
             </DishCard>
           ))
         ) : (

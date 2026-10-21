@@ -1,5 +1,5 @@
 import '../styles/dishcard.css';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { Clock, Ghost, Hourglass } from 'lucide-react';
 import type { Dish } from '../types/dish';
 
@@ -14,7 +14,7 @@ interface DishCardProps {
   children?: ReactNode;
 }
 
-export default function DishCard({
+function DishCard({
   dish,
   recipes,
   title,
@@ -91,3 +91,5 @@ export default function DishCard({
     </div>
   );
 }
+
+export default memo(DishCard);
