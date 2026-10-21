@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { DishProvider } from '../src/context/DishProvider';
 import { AuthContext, AUTH_REQUIRED_MESSAGE } from '../src/context/AuthContext';
 import type { AuthContextType } from '../src/context/AuthContext';
+import { AuthProvider } from '../src/context/AuthProvider';
 import { ThemeContext } from '../src/context/theme-context';
 import { useDishContext } from '../src/context/useDishContext';
 import { useDishFilter } from '../src/hooks/useDishFilter';
@@ -119,6 +120,18 @@ function AuthPromptHarness({ children }: PropsWithChildren) {
   );
 }
 
+function SupabaseAuthHarness() {
+  return (
+    <ThemeContext.Provider value={{ theme: 'light', toggleTheme: () => {} }}>
+      <MemoryRouter>
+        <AuthProvider>
+          <Header />
+        </AuthProvider>
+      </MemoryRouter>
+    </ThemeContext.Provider>
+  );
+}
+
 function CalendarAuthHarness({
   initialUser = null,
   initialLoading = false,
@@ -196,6 +209,15 @@ const resetSupabaseMock = (globalThis as typeof globalThis & {
 const setStatusWriteError = (globalThis as typeof globalThis & {
   __setStatusWriteError?: (error: { message: string }) => void;
 }).__setStatusWriteError;
+const setSignupResult = (globalThis as typeof globalThis & {
+  __setSignupResult?: (result: {
+    data: { user: User | null; session: { user: User } | null };
+    error: { message: string } | null;
+  }) => void;
+}).__setSignupResult;
+const setInitialSession = (globalThis as typeof globalThis & {
+  __setInitialSession?: (session: { user: User } | null) => void;
+}).__setInitialSession;
 let originalFetchDescriptor: PropertyDescriptor | undefined;
 let originalScrollIntoViewDescriptor: PropertyDescriptor | undefined;
 
@@ -283,7 +305,9 @@ describe('rättRätt-enhetstester', () => {
     expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
     expect(screen.getByRole('heading', { name: 'Skapa konto' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Registrera dig' }));
-    expect(await screen.findByText('Konto skapat! Du är nu inloggad.')).toBeTruthy();
+    expect(await screen.findByText(
+      'Konto skapat! Kontrollera din e-post för att bekräfta kontot innan du loggar in.',
+    )).toBeTruthy();
 
     rerender(renderAuthModal(false));
     rerender(renderAuthModal(true));
@@ -324,6 +348,87 @@ describe('rättRätt-enhetstester', () => {
     expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@example.se');
     expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
     expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
+  });
+
+  it('stänger AuthModal och uppdaterar användaren efter registrering med en session', async () => {
+    const registeredUser = { ...testUser, email: 'newuser@example.se' };
+    setInitialSession?.(null);
+    setSignupResult?.({
+      data: {
+        user: registeredUser,
+        session: { user: registeredUser },
+      },
+      error: null,
+    });
+
+    render(<SupabaseAuthHarness />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Logga in' }));
+    fireEvent.click(screen.getByText('Har du inget konto? Skapa ett här.'));
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: registeredUser.email },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secure-password' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Registrera dig' }));
+
+    expect(await screen.findByText(registeredUser.email)).toBeTruthy();
+    await waitFor(() => expect(screen.queryByRole('heading', { name: 'Skapa konto' })).toBeNull());
+    expect(screen.getByRole('button', { name: 'Logga ut' })).toBeTruthy();
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(0);
+  });
+
+  it('kräver e-postbekräftelse när registreringen inte ger någon aktiv session', async () => {
+    setInitialSession?.(null);
+    setSignupResult?.({
+      data: {
+        user: { ...testUser, email: 'confirm@example.se' },
+        session: null,
+      },
+      error: null,
+    });
+
+    render(<SupabaseAuthHarness />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Logga in' }));
+    fireEvent.click(screen.getByText('Har du inget konto? Skapa ett här.'));
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: 'confirm@example.se' },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secure-password' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Registrera dig' }));
+
+    expect(await screen.findByText(
+      'Konto skapat! Kontrollera din e-post för att bekräfta kontot innan du loggar in.',
+    )).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Skapa konto' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Logga ut' })).toBeNull();
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1);
+  });
+
+  it('visar registreringsfel utan att stänga eller visa inloggad-status', async () => {
+    setInitialSession?.(null);
+    setSignupResult?.({
+      data: { user: null, session: null },
+      error: { message: 'E-postadressen används redan.' },
+    });
+
+    render(<SupabaseAuthHarness />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Logga in' }));
+    fireEvent.click(screen.getByText('Har du inget konto? Skapa ett här.'));
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: 'existing@example.se' },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secure-password' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Registrera dig' }));
+
+    expect(await screen.findByText('Fel: E-postadressen används redan.')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Skapa konto' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Logga ut' })).toBeNull();
+    expect(document.querySelectorAll('.modal-overlay')).toHaveLength(1);
   });
 
   it('visar bara meddelandet om inloggning krävs för att lägga till en maträtt', async () => {

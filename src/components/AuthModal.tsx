@@ -38,9 +38,10 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
         setTimeout(handleClose, 1500); // Stäng modalen automatiskt efter en kort stund
       }
     } else {
-      const { error } = await supabase.auth.signUp({ email, password });
+      const { data, error } = await supabase.auth.signUp({ email, password });
       if (error) setMessage('Fel: ' + error.message);
-      else setMessage('Konto skapat! Du är nu inloggad.');
+      else if (data.session) handleClose();
+      else setMessage('Konto skapat! Kontrollera din e-post för att bekräfta kontot innan du loggar in.');
     }
   };
 

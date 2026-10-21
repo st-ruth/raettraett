@@ -15,31 +15,65 @@ const sharedDishes = [
 const userDishStatuses = [];
 let nextDishId = 42;
 let statusWriteError = null;
+let signupResult = { data: { user: null, session: null }, error: null };
+let initialSession = {
+  access_token: 'test-access-token',
+  user: { id: 'test-user-id' },
+};
+const authStateListeners = new Set();
 
 const resetSupabaseMock = () => {
   userDishStatuses.length = 0;
   nextDishId = 42;
   statusWriteError = null;
+  signupResult = { data: { user: null, session: null }, error: null };
+  initialSession = {
+    access_token: 'test-access-token',
+    user: { id: 'test-user-id' },
+  };
+  authStateListeners.clear();
 };
 
 globalThis.__resetSupabaseMock = resetSupabaseMock;
 globalThis.__setStatusWriteError = error => {
   statusWriteError = error;
 };
+globalThis.__setSignupResult = result => {
+  signupResult = result;
+};
+globalThis.__setInitialSession = session => {
+  initialSession = session;
+};
 
 const supabase = {
   auth: {
     signInWithPassword: async () => ({ error: { message: 'Ogiltiga inloggningsuppgifter.' } }),
-    signUp: async () => ({ error: null }),
+    signUp: async () => {
+      if (signupResult.data.session) {
+        for (const listener of authStateListeners) listener('SIGNED_IN', signupResult.data.session);
+      }
+      return signupResult;
+    },
+    signOut: async () => {
+      for (const listener of authStateListeners) listener('SIGNED_OUT', null);
+      return { error: null };
+    },
     getSession: async () => ({
       data: {
-        session: {
-          access_token: 'test-access-token',
-          user: { id: 'test-user-id' },
-        },
+        session: initialSession,
       },
       error: null,
     }),
+    onAuthStateChange: callback => {
+      authStateListeners.add(callback);
+      return {
+        data: {
+          subscription: {
+            unsubscribe: () => authStateListeners.delete(callback),
+          },
+        },
+      };
+    },
   },
   from: (table) => {
     if (table === 'shared_dishes') {

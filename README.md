@@ -119,7 +119,7 @@ Testerna täcker bland annat filtrering på proteintyp och snabblagat, laddnings
 
 ## Kända problem och vidareutveckling
 
-- Utveckla navigering mellan veckor i matsedelsvyn.
+- Utveckla navigering mellan veckor i matsedelsvyn på 30 dagar.
 - Matsedeln sparas inte i databasen utan nollställs när sidan laddas om. Nästa steg vore att spara den per användare i Supabase.
 - Några valideringsmeddelanden i formulär och i dagsredigeringen visas fortfarande med `alert()` och borde bytas mot meddelanden i sidan.
 - Valideringen av rätter och listorna med proteintyper och kolhydrater finns både i frontend och backend. De borde delas i en gemensam modul.
