@@ -11,12 +11,9 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": {
-        "service": "server"
-      }
-    },
+       {
+     "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+   },
     {
       "source": "/(.*)",
       "destination": {
