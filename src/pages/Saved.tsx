@@ -17,7 +17,7 @@ export default function Saved() {
   const [showFilters, setShowFilters] = useState(false);
   const [isDishFormModalOpen, setIsDishFormModalOpen] = useState(false);
 
-  const { dishes, userDishStatuses, updateDishStatus } = useDishContext();
+  const { dishes, userDishStatuses, updateDishStatus, dishesLoading, dishesError } = useDishContext();
   const { requireAuth } = useAuth();
 
   const baseFilteredDishes = useMemo(() => dishes.filter(dish => {
@@ -155,7 +155,13 @@ export default function Saved() {
       </div>
 
       <div className="saved-list">
-        {processedDishes.length > 0 ? (
+        {dishesLoading ? (
+          <p className="empty-state" role="status" aria-live="polite">Hämtar recept...</p>
+        ) : dishesError ? (
+          <p className="empty-state" role="alert">{dishesError}</p>
+        ) : dishes.length === 0 ? (
+          <p className="empty-state">Det finns inga recept att visa ännu.</p>
+        ) : processedDishes.length > 0 ? (
           processedDishes.map(dish => (
             <DishCard key={dish.id} dish={dish} variant="calendar">
               

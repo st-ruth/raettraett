@@ -6,7 +6,7 @@ import '../styles/actionButtons.css'; // Din styling bevarad!
 import '../styles/randomizer.css'; 
 
 export default function Randomizer() {
-  const { currentDish, randomizeDish, updateDishStatus } = useDishContext();
+  const { dishes, currentDish, randomizeDish, updateDishStatus, dishesLoading, dishesError } = useDishContext();
 
   // Tar nu emot engelska statusar för att matcha databasen
   const handleAction = (newStatus: DishStatus) => {
@@ -15,13 +15,31 @@ export default function Randomizer() {
     }
   };
 
+  if (dishesLoading) {
+    return (
+      <div className="randomizer-container">
+        <p role="status" aria-live="polite">Hämtar recept...</p>
+      </div>
+    );
+  }
+
+  if (dishesError) {
+    return (
+      <div className="randomizer-container">
+        <p role="alert">{dishesError}</p>
+      </div>
+    );
+  }
+
   // Säkerhetsnät om man swipat bort alla kort
   if (!currentDish) {
     return (
       <div className="randomizer-container">
         <div className="randomizer-header">
           <h1>Slut på inspo! 🌪️</h1>
-          <p>Du har gått igenom alla tillgängliga rätter.</p>
+          <p>{dishes.length === 0
+            ? 'Det finns inga recept att visa ännu.'
+            : 'Du har gått igenom alla tillgängliga rätter.'}</p>
         </div>
       </div>
     );

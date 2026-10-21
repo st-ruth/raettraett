@@ -4,11 +4,11 @@ import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';
 import { supabase } from '../services/supabaseClient';
+import { fetchDishes } from '../services/api';
 import { useAuth } from './useAuth';
 import { AUTH_REQUIRED_MESSAGE } from './AuthContext';
 
 const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
-const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3000';
 const dishStatusOptions = ['yes', 'no', 'maybe'] as const;
 const carbOptions = [
   'pasta', 'rice', 'potatoes', 'salad', 'bulgur_couscous', 'noodles', 'bread', 'other',
@@ -133,12 +133,20 @@ const generateFullPlan = (
 export function DishProvider({ children }: { children: ReactNode }) {
   const { requireAuth, user } = useAuth();
   const [dishes, setDishes] = useState<Dish[]>([]);
+  const [dishLoadState, setDishLoadState] = useState<{
+    userId: string | null;
+    loading: boolean;
+    error: string | null;
+  }>({ userId: null, loading: true, error: null });
   const [userDishStatusState, setUserDishStatusState] = useState<{
     userId: string | null;
     statuses: Record<string, DishStatus>;
   }>({ userId: null, statuses: {} });
+  const currentUserId = user?.id ?? null;
+  const dishesLoading = dishLoadState.userId !== currentUserId || dishLoadState.loading;
+  const dishesError = dishLoadState.userId === currentUserId ? dishLoadState.error : null;
   const userDishStatusesRef = useRef<Record<string, DishStatus>>({});
-  const userDishStatuses = userDishStatusState.userId === (user?.id ?? null)
+  const userDishStatuses = userDishStatusState.userId === currentUserId
     ? userDishStatusState.statuses
     : {};
   const [currentDish, setCurrentDish] = useState<Dish | null>(null);
@@ -148,87 +156,103 @@ export function DishProvider({ children }: { children: ReactNode }) {
     userDishStatusesRef.current = {};
 
     const fetchDishData = async () => {
-      const dishRequest = fetch(`${API_URL}/api/dishes`)
-        .then(response => ({ response, error: null }))
-        .catch(error => ({ response: null, error }));
-      const [dishResult, statusResult] = await Promise.all([
-        dishRequest,
-        user
-          ? supabase
-            .from('user_dish_statuses')
-            .select('dish_id, status')
-            .eq('user_id', user.id)
-          : Promise.resolve({ data: [], error: null }),
-      ]);
+      let errorMessage: string | null = null;
+      try {
+        const dishRequest = fetchDishes()
+          .then(data => ({ data, error: null }))
+          .catch(error => ({ data: null, error }));
+        const [dishResult, statusResult] = await Promise.all([
+          dishRequest,
+          user
+            ? supabase
+              .from('user_dish_statuses')
+              .select('dish_id, status')
+              .eq('user_id', user.id)
+            : Promise.resolve({ data: [], error: null }),
+        ]);
 
-      if (!isCurrentRequest) return;
+        if (!isCurrentRequest) return;
 
-      if (dishResult.error) {
-        console.error('Kunde inte nå Express-servern för gemensamma maträtter:', dishResult.error);
-        return;
+        if (dishResult.error) {
+          console.error('Kunde inte nå Express-servern för gemensamma maträtter:', dishResult.error);
+          errorMessage = dishResult.error instanceof Error && dishResult.error.message.startsWith('HTTP ')
+            ? 'Recepten kunde inte hämtas från servern. Försök igen senare.'
+            : 'Kunde inte hämta recepten från servern. Kontrollera anslutningen och försök igen.';
+          return;
+        }
+
+        const dishRows: unknown = dishResult.data;
+        if (!Array.isArray(dishRows)) {
+          console.error('Express-servern returnerade inte en lista med maträtter:', dishRows);
+          errorMessage = 'Servern returnerade ett ogiltigt receptsvar.';
+          return;
+        }
+
+        const parsedDishes = dishRows.map(parseDish);
+        if (parsedDishes.some(dish => dish === null)) {
+          console.error('Express-servern returnerade en eller flera ogiltiga maträtter:', dishRows);
+          errorMessage = 'Servern returnerade recept med ogiltigt innehåll.';
+          return;
+        }
+
+        if (statusResult.error) {
+          console.error('Kunde inte hämta personliga maträttsstatusar:', statusResult.error);
+          errorMessage = 'Dina personliga listor kunde inte hämtas. Försök igen senare.';
+          return;
+        }
+
+        const statusRows: unknown = statusResult.data;
+        if (!Array.isArray(statusRows)) {
+          console.error('Supabase returnerade inte en lista med personliga maträttsstatusar:', statusRows);
+          errorMessage = 'Dina personliga listor returnerade ett ogiltigt svar.';
+          return;
+        }
+
+        const parsedStatuses = statusRows.map(parseStatusRow);
+        if (parsedStatuses.some(status => status === null)) {
+          console.error('Supabase returnerade en eller flera ogiltiga personliga maträttsstatusar:', statusRows);
+          errorMessage = 'Dina personliga listor innehåller ogiltiga statusar.';
+          return;
+        }
+
+        const catalogById = new Map<string, Dish>();
+        parsedDishes.filter((dish): dish is Dish => dish !== null)
+          .forEach(dish => catalogById.set(dish.id, dish));
+        const seenTitles = new Set<string>();
+        const mergedDishes = [...catalogById.values()].filter(dish => {
+          const normalizedTitle = normalizeDishTitle(dish.title);
+          if (seenTitles.has(normalizedTitle)) return false;
+          seenTitles.add(normalizedTitle);
+          return true;
+        });
+        const statuses = Object.fromEntries(
+          parsedStatuses.filter((status): status is [string, DishStatus] => status !== null)
+        );
+
+        if (!isCurrentRequest) return;
+        setDishes(mergedDishes);
+        userDishStatusesRef.current = statuses;
+        setUserDishStatusState({ userId: user?.id ?? null, statuses });
+
+        const unseenDish = mergedDishes.find(dish => !statuses[dish.id]);
+        setCurrentDish(unseenDish ?? null);
+      } catch (error) {
+        if (isCurrentRequest) {
+          console.error('Ett oväntat fel inträffade när maträtter hämtades:', error);
+          errorMessage = 'Ett oväntat fel inträffade när recepten skulle hämtas. Försök igen senare.';
+        }
+      } finally {
+        if (isCurrentRequest) {
+          setDishLoadState({
+            userId: user?.id ?? null,
+            loading: false,
+            error: errorMessage,
+          });
+        }
       }
-      if (!dishResult.response?.ok) {
-        console.error(`Kunde inte hämta gemensamma maträtter från Express-servern (HTTP ${dishResult.response?.status}).`);
-        return;
-      }
-
-      const dishRows: unknown = await dishResult.response.json();
-      if (!Array.isArray(dishRows)) {
-        console.error('Express-servern returnerade inte en lista med maträtter:', dishRows);
-        return;
-      }
-
-      const parsedDishes = dishRows.map(parseDish);
-      if (parsedDishes.some(dish => dish === null)) {
-        console.error('Express-servern returnerade en eller flera ogiltiga maträtter:', dishRows);
-        return;
-      }
-
-      if (statusResult.error) {
-        console.error('Kunde inte hämta personliga maträttsstatusar:', statusResult.error);
-        return;
-      }
-
-      const statusRows: unknown = statusResult.data;
-      if (!Array.isArray(statusRows)) {
-        console.error('Supabase returnerade inte en lista med personliga maträttsstatusar:', statusRows);
-        return;
-      }
-
-      const parsedStatuses = statusRows.map(parseStatusRow);
-      if (parsedStatuses.some(status => status === null)) {
-        console.error('Supabase returnerade en eller flera ogiltiga personliga maträttsstatusar:', statusRows);
-        return;
-      }
-
-      const catalogById = new Map<string, Dish>();
-      parsedDishes.filter((dish): dish is Dish => dish !== null)
-        .forEach(dish => catalogById.set(dish.id, dish));
-      const seenTitles = new Set<string>();
-      const mergedDishes = [...catalogById.values()].filter(dish => {
-        const normalizedTitle = normalizeDishTitle(dish.title);
-        if (seenTitles.has(normalizedTitle)) return false;
-        seenTitles.add(normalizedTitle);
-        return true;
-      });
-      const statuses = Object.fromEntries(
-        parsedStatuses.filter((status): status is [string, DishStatus] => status !== null)
-      );
-
-      if (!isCurrentRequest) return;
-      setDishes(mergedDishes);
-      userDishStatusesRef.current = statuses;
-      setUserDishStatusState({ userId: user?.id ?? null, statuses });
-
-      const unseenDish = mergedDishes.find(dish => !statuses[dish.id]);
-      setCurrentDish(unseenDish ?? null);
     };
 
-    void fetchDishData().catch(error => {
-      if (isCurrentRequest) {
-        console.error('Ett oväntat fel inträffade när maträtter hämtades:', error);
-      }
-    });
+    void fetchDishData();
 
     return () => {
       isCurrentRequest = false;
@@ -442,6 +466,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
     <DishContext.Provider value={{ 
       dishes, 
       userDishStatuses,
+      dishesLoading,
+      dishesError,
       currentDish, 
       randomizeDish, 
       addDish,

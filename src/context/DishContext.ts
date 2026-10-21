@@ -7,6 +7,8 @@ import type { MealPlanDay } from '../types/mealPlan';
 export interface DishContextType {
   dishes: Dish[];
   userDishStatuses: Record<string, DishStatus>;
+  dishesLoading: boolean;
+  dishesError: string | null;
   currentDish: Dish | null; 
   randomizeDish: () => void;
   addDish: (newDish: Omit<Dish, 'id'>) => Promise<Dish | null>;

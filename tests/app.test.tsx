@@ -16,9 +16,13 @@ jest.unstable_mockModule('lucide-react', () => ({
   Clock: () => null,
   Ghost: () => null,
   Hourglass: () => null,
+  Smile: () => null,
+  Meh: () => null,
+  Angry: () => null,
 }));
 
 const { default: Home } = await import('../src/pages/Home');
+const { default: Randomizer } = await import('../src/pages/Randomizer');
 
 const testUser = {
   id: 'test-user-id',
@@ -50,15 +54,26 @@ const resetSupabaseMock = (globalThis as typeof globalThis & {
 }).__resetSupabaseMock;
 let originalFetchDescriptor: PropertyDescriptor | undefined;
 
+interface MockFetchResponse {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+}
+
+const makeFetchResponse = (body: unknown, status = 200) =>
+  ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  }) satisfies MockFetchResponse;
+
 beforeEach(() => {
   resetSupabaseMock?.();
   originalFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
   Object.defineProperty(globalThis, 'fetch', {
     configurable: true,
     writable: true,
-    value: jest.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [{
+    value: () => Promise.resolve(makeFetchResponse([{
         id: 'json-dish',
         title: 'JSON-rätt',
         proteinType: 'mince',
@@ -73,8 +88,7 @@ beforeEach(() => {
         title: 'Min JA-rätt',
         protein_type: 'chicken',
         preferred_days: 'both',
-      }],
-    }),
+      }])),
   });
 });
 
@@ -84,7 +98,7 @@ afterEach(() => {
   if (originalFetchDescriptor) {
     Object.defineProperty(globalThis, 'fetch', originalFetchDescriptor);
   } else {
-    delete (globalThis as typeof globalThis & { fetch?: typeof fetch }).fetch;
+    Reflect.deleteProperty(globalThis, 'fetch');
   }
 });
 
@@ -103,6 +117,55 @@ describe('rättRätt-enhetstester', () => {
     });
 
     expect(result.current.processedDishes.map(dish => dish.id)).toEqual(['chicken-fast']);
+  });
+
+  it('visar laddningsmeddelande tills recept hämtats', async () => {
+    let resolveFetch: (response: MockFetchResponse) => void = () => {};
+    const pendingFetch = new Promise<MockFetchResponse>(resolve => {
+      resolveFetch = resolve;
+    });
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      writable: true,
+      value: () => pendingFetch,
+    });
+
+    render(
+      <AuthContext.Provider value={authenticatedTestContext}>
+        <DishProvider>
+          <Randomizer />
+        </DishProvider>
+      </AuthContext.Provider>,
+    );
+
+    expect(screen.getByRole('status').textContent).toBe('Hämtar recept...');
+    resolveFetch(makeFetchResponse([{
+        id: 'loaded-dish',
+        title: 'Hämtad rätt',
+        proteinType: 'fish',
+        preferredDays: 'both',
+      }]));
+
+    expect(await screen.findByText('Hämtad rätt')).toBeTruthy();
+  });
+
+  it('visar ett felmeddelande om receptservern svarar med HTTP-fel', async () => {
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      writable: true,
+      value: () => Promise.resolve(makeFetchResponse(null, 503)),
+    });
+
+    render(
+      <AuthContext.Provider value={authenticatedTestContext}>
+        <DishProvider>
+          <Randomizer />
+        </DishProvider>
+      </AuthContext.Provider>,
+    );
+
+    const errorMessage = await screen.findByRole('alert');
+    expect(errorMessage.textContent).toContain('Recepten kunde inte hämtas från servern.');
   });
 
   it('slumpar på startsidan endast bland rätter som markerats JA personligen', async () => {
