@@ -1,5 +1,24 @@
+import { useId, useState } from 'react';
 import { X, Clock, Hourglass } from 'lucide-react';
+import { useDishContext } from '../context/useDishContext';
+import type { CarbType, Dish, PreferredDays, ProteinType } from '../types/dish';
+import '../styles/modal.css';
 import '../styles/dishFormModal.css'; 
+import { useAccessibleModal } from '../hooks/useAccessibleModal';
+
+const preferredDayOptions: readonly PreferredDays[] = ['weekdays', 'weekends', 'both'];
+const proteinOptions: readonly ProteinType[] = [
+  'mince', 'chicken', 'sausage', 'meat', 'pork', 'fish', 'stew',
+  'soup', 'cheese', 'egg', 'mushroom', 'pulled', 'legumes', 'other',
+];
+const carbOptions: readonly CarbType[] = [
+  'pasta', 'rice', 'potatoes', 'salad', 'bulgur_couscous', 'noodles', 'bread', 'other',
+];
+
+const isChoice = <T extends string>(
+  options: readonly T[],
+  value: FormDataEntryValue | null
+): value is T => typeof value === 'string' && options.some(option => option === value);
 
 interface DishFormModalProps {
   isOpen: boolean;       
@@ -7,27 +26,99 @@ interface DishFormModalProps {
 }
 
 export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
+  const { addDish } = useDishContext();
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const titleId = useId();
+  const handleClose = () => {
+    if (!isSaving) onClose();
+  };
+  const dialogRef = useAccessibleModal(isOpen, handleClose);
+
   if (!isOpen) return null;
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (isSaving) return;
+
+    const formData = new FormData(event.currentTarget);
+    const title = formData.get('title');
+    const preferredDays = formData.get('preferredDays');
+    const proteinType = formData.get('proteinType');
+    const carbType = formData.get('carbType');
+    const cookingTime = formData.get('cookingTime');
+
+    if (
+      typeof title !== 'string' ||
+      !title.trim() ||
+      !isChoice(preferredDayOptions, preferredDays) ||
+      !isChoice(proteinOptions, proteinType)
+    ) {
+      window.alert('Fyll i rättens namn, passande dagar och huvudprotein.');
+      return;
+    }
+
+    const dish: Omit<Dish, 'id'> = {
+      title: title.trim(),
+      preferredDays,
+      proteinType,
+    };
+
+    const category = formData.get('category');
+    if (typeof category === 'string' && category.trim()) {
+      dish.category = category.trim();
+    }
+
+    if (isChoice(carbOptions, carbType)) {
+      dish.carbType = carbType;
+    }
+
+    if (cookingTime === 'quick') {
+      dish.isQuick = true;
+    } else if (cookingTime === 'slow') {
+      dish.isSlowCooked = true;
+    }
+
+    setIsSaving(true);
+    setSaveError(null);
+    try {
+      const savedDish = await addDish(dish);
+      if (!savedDish) return;
+      onClose();
+    } catch (error) {
+      setSaveError(
+        error instanceof Error
+          ? error.message
+          : 'Det gick inte att spara maträtten. Försök igen.'
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Förhindra att sidan i bakgrunden scrollas när modalen är öppen
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose();
+    if (e.target === e.currentTarget && !isSaving) {
+      handleClose();
     }
   };
 
   return (
     <div className="modal-overlay" onClick={handleOverlayClick}>
-      <div className="modal-content">
+      <div
+        ref={dialogRef}
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        data-a11y-dialog="true"
+        tabIndex={-1}
+      >
         
         <div className="modal-header">
-          <h2>Skapa ny maträtt</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Stäng">
-            <X size={24} />
+          <h2 id={titleId}>Skapa ny maträtt</h2>
+          <button type="button" className="close-btn" onClick={handleClose} aria-label="Stäng" disabled={isSaving}>
+            <X size={24} aria-hidden="true" />
           </button>
         </div>
         
@@ -38,8 +129,9 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
           </div>
 
           <div className="form-group">
-            <p className="form-group-label">När passar rätten bäst? *</p>
-            <div className="form-checkboxes preferred-days-options">
+            <fieldset className="radio-group">
+              <legend className="form-group-label">När passar rätten bäst? *</legend>
+              <div className="form-checkboxes preferred-days-options">
               <label className="checkbox-label">
                 <input type="radio" name="preferredDays" value="weekdays" required />
                 <span>Vardagar</span>
@@ -52,7 +144,8 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
                 <input type="radio" name="preferredDays" value="both" />
                 <span>Båda</span>
               </label>
-            </div>
+              </div>
+            </fieldset>
           </div>
 
           <div className="form-group">
@@ -96,7 +189,9 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
             </select>
           </div>
 
-        <div className="form-checkboxes">
+        <fieldset className="radio-group form-group">
+          <legend className="form-group-label">Tillagningstid</legend>
+          <div className="form-checkboxes">
             <label className="checkbox-label">
               {/* Radioknappar med samma 'name' gör att bara en kan väljas */}
               <input type="radio" name="cookingTime" value="quick" />
@@ -108,11 +203,15 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
               <span><Hourglass size={16} aria-hidden="true" /> Långkok / Tar extra tid</span>
             </label>
           </div>
+        </fieldset>
 
           <div className="form-actions">
-            <button type="button" className="btn-secondary" onClick={onClose}>Avbryt</button>
-            <button type="submit" className="btn-primary">Spara</button>
+            <button type="button" className="btn-secondary" onClick={handleClose} disabled={isSaving}>Avbryt</button>
+            <button type="submit" className="btn-primary" disabled={isSaving}>
+              {isSaving ? 'Sparar...' : 'Spara'}
+            </button>
           </div>
+          {saveError && <p role="alert">{saveError}</p>}
           <p className="required-fields-note">*Obligatoriska fält</p>
         </form>
 

@@ -1,0 +1,322 @@
+[
+  {
+    "id": "1",
+    "title": "korvstroganoff",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "sausage",
+    "carbType": "rice"
+  },
+  {
+    "id": "2",
+    "title": "Tacos",
+    "category": "Mexikanskt",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "other",
+    "isQuick": true
+  },
+  {
+    "id": "3",
+    "title": "högrevsgryta",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "stew",
+    "carbType": "potatoes",
+    "isSlowCooked": true
+  },
+  {
+    "id": "4",
+    "title": "köttfärssås",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "pasta",
+    "isQuick": true
+  },
+  {
+    "id": "5",
+    "title": "koreansk pulled tacos",
+    "category": "Asiatiskt",
+    "preferredDays": "weekends",
+    "proteinType": "pulled",
+    "carbType": "bread",
+    "isSlowCooked": true
+  },
+  {
+    "id": "6",
+    "title": "Dillkött",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "meat",
+    "carbType": "potatoes",
+    "isSlowCooked": true
+  },
+  {
+    "id": "7",
+    "title": "Falsk fläskfilé",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "8",
+    "title": "Kebabgryta",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "meat",
+    "carbType": "rice"
+  },
+  {
+    "id": "9",
+    "title": "Wallenbergare",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "10",
+    "title": "Persiljejärpar",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "11",
+    "title": "Kokt fisk med äggsås",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "fish",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "12",
+    "title": "Falukorv med stuvad blomkål",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "sausage",
+    "carbType": "other"
+  },
+  {
+    "id": "13",
+    "title": "Viltlax",
+    "category": "Fisk",
+    "preferredDays": "both",
+    "proteinType": "fish",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "14",
+    "title": "Kyckling med currysås",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "chicken",
+    "carbType": "rice"
+  },
+  {
+    "id": "15",
+    "title": "Fläskpannkaka",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "pork",
+    "carbType": "other"
+  },
+  {
+    "id": "16",
+    "title": "Raggmunk med fläsk",
+    "category": "Husman",
+    "preferredDays": "weekdays",
+    "proteinType": "pork",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "17",
+    "title": "Kalops",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "meat",
+    "carbType": "potatoes",
+    "isSlowCooked": true
+  },
+  {
+    "id": "18",
+    "title": "Fläsk med hoisinsås och ris",
+    "category": "Asiatiskt",
+    "preferredDays": "weekdays",
+    "proteinType": "pork",
+    "carbType": "rice"
+  },
+  {
+    "id": "19",
+    "title": "Fläsk med löksås",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "pork",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "20",
+    "title": "Orange chicken",
+    "category": "Asiatiskt",
+    "preferredDays": "both",
+    "proteinType": "chicken",
+    "carbType": "rice",
+    "isQuick": true
+  },
+  {
+    "id": "21",
+    "title": "Köttfärslimpa",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "22",
+    "title": "Pannbiff",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "23",
+    "title": "Fläsklägg med rotmos",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "pork",
+    "carbType": "potatoes",
+    "isSlowCooked": true
+  },
+  {
+    "id": "24",
+    "title": "Panerad fisk med skolsås",
+    "category": "Fisk",
+    "preferredDays": "weekdays",
+    "proteinType": "fish",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "25",
+    "title": "Fiskgratäng med mos",
+    "category": "Fisk",
+    "preferredDays": "both",
+    "proteinType": "fish",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "26",
+    "title": "Lasagne",
+    "category": "Italienskt",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "pasta"
+  },
+  {
+    "id": "27",
+    "title": "Spenatsoppa",
+    "category": "Vegetariskt",
+    "preferredDays": "weekdays",
+    "proteinType": "soup",
+    "carbType": "other",
+    "isQuick": true
+  },
+  {
+    "id": "28",
+    "title": "Lax med hovmästarsås",
+    "category": "Fisk",
+    "preferredDays": "weekends",
+    "proteinType": "fish",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "29",
+    "title": "Pasta med bacon och kantareller",
+    "category": "Pasta",
+    "preferredDays": "both",
+    "proteinType": "pork",
+    "carbType": "pasta"
+  },
+  {
+    "id": "30",
+    "title": "Kålpudding",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "31",
+    "title": "Grekiska biffar med tzatziki",
+    "category": "Medelhavet",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "potatoes"
+  },
+  {
+    "id": "32",
+    "title": "Kycklinggryta",
+    "category": "Husman",
+    "preferredDays": "both",
+    "proteinType": "chicken",
+    "carbType": "rice"
+  },
+  {
+    "id": "33",
+    "title": "Beef Bourguignon",
+    "category": "Husman",
+    "preferredDays": "weekends",
+    "proteinType": "meat",
+    "carbType": "potatoes",
+    "isSlowCooked": true
+  },
+  {
+    "id": "34",
+    "title": "Pad thai",
+    "category": "Asiatiskt",
+    "preferredDays": "weekdays",
+    "proteinType": "chicken",
+    "carbType": "noodles"
+  },
+  {
+    "id": "35",
+    "title": "Chili con carne",
+    "category": "Tex-Mex",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "carbType": "rice",
+    "isQuick": true
+  },
+  {
+    "title": "pannkaka",
+    "preferredDays": "both",
+    "proteinType": "egg",
+    "id": "b2c911c5-586b-4678-88a5-4bc4402acb28"
+  },
+  {
+    "title": "räkmacka",
+    "preferredDays": "weekends",
+    "proteinType": "fish",
+    "category": "lyx",
+    "carbType": "bread",
+    "isQuick": true,
+    "id": "8c8d49a8-300f-4376-901b-172a66a234e4"
+  },
+  {
+    "title": "Thaicos",
+    "preferredDays": "both",
+    "proteinType": "mince",
+    "id": "31ccc437-51bf-4386-be47-869f5d2e93c6"
+  },
+  {
+    "title": "KarlJohan Pasta",
+    "preferredDays": "both",
+    "proteinType": "mushroom",
+    "category": "Husman",
+    "carbType": "pasta",
+    "id": "34fab932-bd22-4d7b-8073-a562a8cd9344"
+  }
+]

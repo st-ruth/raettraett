@@ -22,7 +22,7 @@
   padding: 12px 16px;
   border-radius: 8px;
   border: 1px solid var(--color-ui);
-  background-color: #ffffff;
+  background-color: var(--color-white);
   color: var(--color-ui);
   font-size: 1rem;
 }
@@ -50,7 +50,7 @@
 .filter-toggle-btn {
   background-color: var(--color-ui-transparent);
   border: 1px solid var(--color-ui);
-  color: #ffffff;
+  color: var(--color-white);
   border-radius: 8px;
   padding: 0 16px;
   cursor: pointer;
@@ -62,7 +62,7 @@
 
 .filter-toggle-btn:hover {
   background-color: var(--color-ui);
-  color: #ffffff;
+  color: var(--color-white);
 }
 
 .filter-toggle-btn:active {
@@ -71,22 +71,46 @@
 
 /* Dropdown för sortering/filtrering */
 .filter-dropdown {
-  background-color: var(--color-ui-transparent);
+  display: flex;
+  flex-direction: column;
+  margin: 12px 0 16px;
+  padding: 12px;
+  gap: 12px;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  background-color: #f8f9fa;
+  color: var(--color-white);
   font-size: 0.9rem;
-  color: #ffffff;
 }
 
-.filter-dropdown span {
-  display: inline-flex;
+.filter-row {
+  display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
+}
+
+.filter-row-wrap {
+  flex-wrap: wrap;
+}
+
+.filter-option-label {
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.filter-select {
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.quick-filter-label {
+  display: flex;
+  align-items: center;
+  margin-left: 8px;
+  gap: 6px;
   cursor: pointer;
-  color: inherit;
-  margin: 0 4px;
+  font-size: 0.9rem;
 }
 
 /* --- Flikar (Tabs) --- */
@@ -109,7 +133,7 @@
 }
 
 .tab-btn.active {
-  color: #ffffff;
+  color: var(--color-white);
   border-bottom: 2px solid #d4a359; /* Accentfärg för aktiv flik */
 }
 
@@ -156,7 +180,12 @@
   transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
-.action-icon:hover {
+.action-icon.status-action {
+  color: #888890;
+}
+
+.action-icon.status-action:hover {
+  color: var(--color-white);
   opacity: 1;
 }
 
@@ -164,13 +193,13 @@
   transform: scale(0.9);
 }
 
-/* Färger för plus och kryss enligt skissen */
-.action-icon.add {
-  color: #4CAF50; /* Grönt plus */
-}
-
 .action-icon.remove {
   color: #F44336; /* Rött kryss */
+}
+
+.action-icon.remove:hover {
+  color: #F44336;
+  opacity: 1;
 }
 
 @media (min-width: 768px) {
@@ -185,5 +214,24 @@
 
   .saved-list > .dish-card {
     max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .saved-list .dish-card-actions {
+    top: auto;
+    right: 0;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .compact-actions {
+    justify-content: center;
+  }
+
+  .saved-list .dish-card-content {
+    padding-bottom: 48px;
   }
 }

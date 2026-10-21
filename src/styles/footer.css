@@ -11,3 +11,12 @@
     color: var(--color-ui);
     }
 }
+
+body[data-theme="dark"] .footer,
+body[data-theme="dark"] .footer p {
+    color: var(--color-header);
+}
+
+body[data-theme="dark"] .footer {
+    border-top-color: var(--color-header);
+}
