@@ -4,7 +4,6 @@ import MonthModal from '../components/MonthModal';
 import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
-import { AUTH_REQUIRED_MESSAGE } from '../context/AuthContext';
 import '../styles/calendar.css';
 
 const getMonday = (d: Date) => {
@@ -26,9 +25,16 @@ export default function CalendarPage() {
   const [isMonthModalOpen, setIsMonthModalOpen] = useState(false);
   const [weekStartDate, setWeekStartDate] = useState(getMonday(new Date()));
   const [activeDate, setActiveDate] = useState(new Date());
+  const hasCheckedAuthOnEntry = useRef(false);
 
   const { mealPlan } = useDishContext();
-  const { user, requireAuth } = useAuth();
+  const { user, loading, requireAuth } = useAuth();
+
+  useEffect(() => {
+    if (loading || hasCheckedAuthOnEntry.current) return;
+    hasCheckedAuthOnEntry.current = true;
+    if (!user) requireAuth('Logga in för att spara ändringar och använda personliga funktioner.');
+  }, [loading, user, requireAuth]);
 
   const weekDays = Array.from({ length: 7 }).map((_, i) => {
     const d = new Date(weekStartDate);
@@ -144,15 +150,6 @@ export default function CalendarPage() {
   return (
     <div className="calendar-page">
       <h1 className="visually-hidden">Kalender</h1>
-
-      {!user && (
-        <aside className="calendar-login-notice">
-          <p>Logga in för att spara ändringar och använda personliga funktioner.</p>
-          <button type="button" onClick={() => requireAuth(AUTH_REQUIRED_MESSAGE)}>
-            Logga in
-          </button>
-        </aside>
-      )}
 
       {/* --- TOP STRIP --- */}
       <div className="calendar-top-strip">

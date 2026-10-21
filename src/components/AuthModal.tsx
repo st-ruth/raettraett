@@ -18,6 +18,14 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
 
   if (!isOpen) return null;
 
+  const handleClose = () => {
+    setEmail('');
+    setPassword('');
+    setMessage('');
+    setIsLoginMode(true);
+    onClose();
+  };
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('Laddar...');
@@ -27,7 +35,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
       if (error) setMessage('Fel vid inloggning: ' + error.message);
       else {
         setMessage('Inloggad!');
-        setTimeout(onClose, 1500); // Stäng modalen automatiskt efter en kort stund
+        setTimeout(handleClose, 1500); // Stäng modalen automatiskt efter en kort stund
       }
     } else {
       const { error } = await supabase.auth.signUp({ email, password });
@@ -37,7 +45,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
   };
 
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
+    if (e.target === e.currentTarget) handleClose();
   };
 
   return (
@@ -45,12 +53,15 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
       <div className="modal-content auth-modal-content">
         <div className="modal-header">
           <h2>{isLoginMode ? 'Logga in' : 'Skapa konto'}</h2>
-          <button type="button" className="close-btn" onClick={onClose} aria-label="Stäng">
+          <button type="button" className="close-btn" onClick={handleClose} aria-label="Stäng">
             <X size={24} />
           </button>
         </div>
 
-        <form className="auth-form" onSubmit={handleAuth}>
+        <form className="auth-form" onSubmit={handleAuth} autoComplete="off">
+          <p className="auth-info-notice">
+            {notice ?? 'Logga in för att spara ändringar och använda personliga funktioner.'}
+          </p>
           <div className="form-group">
             <label htmlFor="auth-email">E-post</label>
             <input
@@ -59,6 +70,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="namn@exempel.se"
+              autoComplete="off"
               required
             />
           </div>
@@ -71,6 +83,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Ditt lösenord"
+              autoComplete="off"
               required
             />
           </div>
@@ -89,7 +102,6 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
             {isLoginMode ? 'Har du inget konto? Skapa ett här.' : 'Har du redan ett konto? Logga in.'}
           </p>
 
-          {notice && <p className="auth-message" role="status" aria-live="polite">{notice}</p>}
           {message && <p className="auth-message" role="status" aria-live="polite">{message}</p>}
         </form>
       </div>

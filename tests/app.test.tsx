@@ -1,10 +1,11 @@
 import { act, cleanup, fireEvent, render, renderHook, screen, waitFor } from '@testing-library/react';
-import type { PropsWithChildren } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { useCallback, useState, type PropsWithChildren } from 'react';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { DishProvider } from '../src/context/DishProvider';
 import { AuthContext, AUTH_REQUIRED_MESSAGE } from '../src/context/AuthContext';
 import type { AuthContextType } from '../src/context/AuthContext';
+import { ThemeContext } from '../src/context/theme-context';
 import { useDishContext } from '../src/context/useDishContext';
 import { useDishFilter } from '../src/hooks/useDishFilter';
 import type { Dish } from '../src/types/dish';
@@ -13,6 +14,18 @@ import type { User } from '@supabase/supabase-js';
 jest.unstable_mockModule('lucide-react', () => ({
   X: () => null,
   Dices: () => null,
+  Dice5: () => null,
+  Moon: () => null,
+  Sun: () => null,
+  LogIn: () => null,
+  LogOut: () => null,
+  CalendarDays: () => null,
+  Home: () => null,
+  Heart: () => null,
+  ChevronLeft: () => null,
+  ChevronRight: () => null,
+  LockKeyhole: () => null,
+  Trash2: () => null,
   MessageSquareMore: () => null,
   Clock: () => null,
   Ghost: () => null,
@@ -25,6 +38,8 @@ jest.unstable_mockModule('lucide-react', () => ({
 const { default: Home } = await import('../src/pages/Home');
 const { default: Randomizer } = await import('../src/pages/Randomizer');
 const { default: AuthModal } = await import('../src/components/AuthModal');
+const { default: Header } = await import('../src/components/Header');
+const { default: CalendarPage } = await import('../src/pages/Calendar');
 
 const testUser = {
   id: 'test-user-id',
@@ -41,6 +56,82 @@ const authenticatedTestContext: AuthContextType = {
   requireAuth: () => true,
   clearAuthPrompt: () => {},
 };
+
+function HeaderAuthHarness() {
+  const [user, setUser] = useState<User | null>(null);
+  const [authPrompt, setAuthPrompt] = useState<string | null>(null);
+  const requireAuth = useCallback((message: string) => {
+    if (user) return true;
+    setAuthPrompt(message);
+    return false;
+  }, [user]);
+  const value: AuthContextType = {
+    user,
+    loading: false,
+    signOut: async () => setUser(null),
+    authPrompt,
+    requireAuth,
+    clearAuthPrompt: () => setAuthPrompt(null),
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      <ThemeContext.Provider value={{ theme: 'light', toggleTheme: () => {} }}>
+        <MemoryRouter>
+          <Header />
+          <button type="button" onClick={() => setUser(testUser)}>Simulera lyckad inloggning</button>
+        </MemoryRouter>
+      </ThemeContext.Provider>
+    </AuthContext.Provider>
+  );
+}
+
+function CalendarAuthHarness({
+  initialUser = null,
+  initialLoading = false,
+}: {
+  initialUser?: User | null;
+  initialLoading?: boolean;
+}) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [loading, setLoading] = useState(initialLoading);
+  const [authPrompt, setAuthPrompt] = useState<string | null>(null);
+  const requireAuth = useCallback((message: string) => {
+    if (user) return true;
+    setAuthPrompt(message);
+    return false;
+  }, [user]);
+  const value: AuthContextType = {
+    user,
+    loading,
+    signOut: async () => setUser(null),
+    authPrompt,
+    requireAuth,
+    clearAuthPrompt: () => setAuthPrompt(null),
+  };
+
+  return (
+    <AuthContext.Provider value={value}>
+      <ThemeContext.Provider value={{ theme: 'light', toggleTheme: () => {} }}>
+        <MemoryRouter initialEntries={['/kalender']}>
+          <DishProvider>
+            <Header />
+            <Link to="/">Startsida</Link>
+            {loading && (
+              <button type="button" onClick={() => setLoading(false)}>
+                Slutför autentisering
+              </button>
+            )}
+            <Routes>
+              <Route path="/kalender" element={<CalendarPage />} />
+              <Route path="/" element={<Link to="/kalender">Återgå till kalender</Link>} />
+            </Routes>
+          </DishProvider>
+        </MemoryRouter>
+      </ThemeContext.Provider>
+    </AuthContext.Provider>
+  );
+}
 
 function makeDish(
   id: string,
@@ -60,6 +151,12 @@ function DishActionNotice() {
   ) : null;
 }
 
+async function finishDishLoading() {
+  await act(async () => {
+    await new Promise(resolve => setTimeout(resolve, 0));
+  });
+}
+
 const resetSupabaseMock = (globalThis as typeof globalThis & {
   __resetSupabaseMock?: () => void;
 }).__resetSupabaseMock;
@@ -67,6 +164,7 @@ const setStatusWriteError = (globalThis as typeof globalThis & {
   __setStatusWriteError?: (error: { message: string }) => void;
 }).__setStatusWriteError;
 let originalFetchDescriptor: PropertyDescriptor | undefined;
+let originalScrollIntoViewDescriptor: PropertyDescriptor | undefined;
 
 interface MockFetchResponse {
   ok: boolean;
@@ -84,6 +182,11 @@ const makeFetchResponse = (body: unknown, status = 200) =>
 beforeEach(() => {
   resetSupabaseMock?.();
   originalFetchDescriptor = Object.getOwnPropertyDescriptor(globalThis, 'fetch');
+  originalScrollIntoViewDescriptor = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'scrollIntoView');
+  Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', {
+    configurable: true,
+    value: jest.fn(),
+  });
   Object.defineProperty(globalThis, 'fetch', {
     configurable: true,
     writable: true,
@@ -113,6 +216,11 @@ afterEach(() => {
     Object.defineProperty(globalThis, 'fetch', originalFetchDescriptor);
   } else {
     Reflect.deleteProperty(globalThis, 'fetch');
+  }
+  if (originalScrollIntoViewDescriptor) {
+    Object.defineProperty(HTMLElement.prototype, 'scrollIntoView', originalScrollIntoViewDescriptor);
+  } else {
+    Reflect.deleteProperty(HTMLElement.prototype, 'scrollIntoView');
   }
 });
 
@@ -150,6 +258,70 @@ describe('rättRätt-enhetstester', () => {
       target: { value: 'secret-password' },
     });
     expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('gammal@exempel.se');
+  });
+
+  it('återställer autentiseringsformuläret genom Header när användaren loggar ut', async () => {
+    render(<HeaderAuthHarness />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Logga in' }));
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: 'gammal@exempel.se' },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secret-password' },
+    });
+    const authForm = document.querySelector('form.auth-form');
+    expect(authForm).not.toBeNull();
+    fireEvent.submit(authForm!);
+    expect(await screen.findByText(/Fel vid inloggning/)).toBeTruthy();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Simulera lyckad inloggning' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Logga ut' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Logga in' }));
+
+    expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('');
+    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@exempel.se');
+    expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
+    expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
+  });
+
+  it('visar automatisk inloggning först efter autentisering och öppnar igen vid återbesök', async () => {
+    render(<CalendarAuthHarness initialLoading />);
+    await finishDishLoading();
+
+    expect(screen.queryByRole('heading', { name: 'Logga in' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Slutför autentisering' }));
+    expect(await screen.findByRole('heading', { name: 'Logga in' })).toBeTruthy();
+    expect(screen.getByText(
+      'Logga in för att spara ändringar och använda personliga funktioner.',
+      { selector: '.auth-info-notice' },
+    )).toBeTruthy();
+    expect(document.querySelector('.calendar-login-notice')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Stäng' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Byt till mörkt läge' }));
+    expect(screen.queryByRole('heading', { name: 'Logga in' })).toBeNull();
+
+    fireEvent.click(screen.getByRole('link', { name: 'Startsida' }));
+    fireEvent.click(await screen.findByRole('link', { name: 'Återgå till kalender' }));
+    expect(await screen.findByRole('heading', { name: 'Logga in' })).toBeTruthy();
+  });
+
+  it('öppnar inte automatiskt inloggningsrutan för inloggad användare', async () => {
+    render(<CalendarAuthHarness initialUser={testUser} />);
+    await finishDishLoading();
+
+    expect(screen.queryByRole('heading', { name: 'Logga in' })).toBeNull();
+    expect(screen.queryByText(AUTH_REQUIRED_MESSAGE)).toBeNull();
+  });
+
+  it('visar MonthModal-rubriken exakt som Matsedel', async () => {
+    render(<CalendarAuthHarness initialUser={testUser} />);
+    await finishDishLoading();
+
+    fireEvent.click(screen.getByRole('button', { name: '30 DAGAR' }));
+    const heading = await screen.findByRole('heading', { name: 'Matsedel' });
+    expect(heading.textContent).toBe('Matsedel');
   });
 
   it('filtrerar maträtter på proteintyp och snabblagat samtidigt', () => {

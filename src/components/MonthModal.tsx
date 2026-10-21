@@ -77,7 +77,6 @@ export default function MonthModal({ onClose }: MonthModalProps) {
         {/* Header */}
         <div className="month-modal-header">
           <div className="month-modal-heading">
-            <span aria-hidden="true">&lt;</span>
             <h2 id={titleId}>Matsedel</h2>
           </div>
 

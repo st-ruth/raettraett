@@ -3,6 +3,16 @@
   flex-direction: column;
 }
 
+.auth-info-notice {
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: 6px;
+  background-color: #000000;
+  color: #ffffff;
+  font-weight: var(--font-weight-light);
+  text-align: center;
+}
+
 .auth-form .form-group input[type="email"],
 .auth-form .form-group input[type="password"] {
   box-sizing: border-box;
