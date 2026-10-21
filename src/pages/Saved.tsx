@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import DishCard from '../components/Dishcard';
+import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
