@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import DishCard from '../components/DishCard';
 import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
@@ -20,11 +20,11 @@ export default function Saved() {
   const { dishes, userDishStatuses, updateDishStatus } = useDishContext();
   const { requireAuth } = useAuth();
 
-  const baseFilteredDishes = dishes.filter(dish => {
-    const matchesTab = userDishStatuses[dish.id] === activeTab; 
+  const baseFilteredDishes = useMemo(() => dishes.filter(dish => {
+    const matchesTab = userDishStatuses[dish.id] === activeTab;
     const matchesSearch = dish.title.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesTab && matchesSearch;
-  });
+  }), [dishes, userDishStatuses, activeTab, searchQuery]);
 
   const {
     processedDishes,

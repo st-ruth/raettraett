@@ -11,8 +11,7 @@ export default function Randomizer() {
   // Tar nu emot engelska statusar för att matcha databasen
   const handleAction = (newStatus: DishStatus) => {
     if (currentDish) {
-      updateDishStatus(currentDish.id, newStatus);
-      randomizeDish();
+      void updateDishStatus(currentDish.id, newStatus).then(randomizeDish);
     }
   };
 

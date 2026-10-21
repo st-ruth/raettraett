@@ -34,6 +34,6 @@ export interface Dish {
     preferredDays: PreferredDays;
     category?: string;
     carbType?: CarbType; 
-    isQuick?: boolean;      //true för snabba rätter <30 min
-    isSlowCooked?: boolean; // true för långkok 
+    isQuick?: boolean; // true för snabba rätter <30 min
+    isSlowCooked?: boolean; // true för långkok
   }

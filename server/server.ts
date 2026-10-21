@@ -1,18 +1,41 @@
 import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
+import dotenv from 'dotenv';
+import { createClient } from '@supabase/supabase-js';
+
+dotenv.config();
 
 const app = express();
-
 app.use(cors());
 app.use(express.json());
 
-app.get('/api/dishes', (req, res) => {
-  // Läs filen
-  const data = fs.readFileSync('./dishes.json', 'utf-8');
-  // Översätt från text till kod och skicka
-  const dishes = JSON.parse(data);
-  res.json(dishes);
+// Skapa kopplingen till Supabase från backenden
+const supabaseUrl = process.env.SUPABASE_URL as string;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// GET-route: Uppfyller VG-kravet genom att agera mellanhand mot tredjeparts-API (Supabase)
+app.get('/api/dishes', async (req, res) => {
+  try {
+    // 1. Läs dina hårdkodade bas-rätter från json
+    const jsonData = fs.readFileSync('./dishes.json', 'utf-8');
+    const jsonDishes = JSON.parse(jsonData);
+
+    // 2. Hämta gemensamma användarskapade rätter från Supabase
+    const { data: supabaseDishes, error } = await supabase
+      .from('shared_dishes')
+      .select('*');
+
+    if (error) throw error;
+
+    // 3. Slå ihop all data och skicka till frontend
+    const allDishes = [...jsonDishes, ...(supabaseDishes || [])];
+    res.json(allDishes);
+  } catch (error) {
+    console.error("Fel vid hämtning av rätter:", error);
+    res.status(500).json({ error: 'Kunde inte hämta receptbanken' });
+  }
 });
 
 const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
@@ -55,7 +78,7 @@ const isDish = (value: unknown): value is {
   (!('isQuick' in value) || typeof value.isQuick === 'boolean') &&
   (!('isSlowCooked' in value) || typeof value.isSlowCooked === 'boolean');
 
-// C (CREATE) - Tar emot en ny rätt och sparar den permanent i dishes.json
+// C (CREATE) - Din intakta route för att spara till dishes.json
 app.post('/api/dishes', (req, res) => {
   const newDish: unknown = req.body;
   if (!isDish(newDish)) {
@@ -79,8 +102,7 @@ app.post('/api/dishes', (req, res) => {
   }
 });
 
-
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Servern snurrar och lyssnar på http://localhost:${PORT}`);
 });

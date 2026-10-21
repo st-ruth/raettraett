@@ -10,5 +10,6 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     '\\.(css)$': '<rootDir>/tests/styleMock.cjs',
+    '^.*services/supabaseClient$': '<rootDir>/tests/supabaseClientMock.cjs',
   },
 };

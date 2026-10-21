@@ -180,7 +180,12 @@
   transition: opacity 0.2s ease, transform 0.1s ease;
 }
 
-.action-icon:hover {
+.action-icon.status-action {
+  color: #888890;
+}
+
+.action-icon.status-action:hover {
+  color: var(--color-white);
   opacity: 1;
 }
 
@@ -188,13 +193,13 @@
   transform: scale(0.9);
 }
 
-/* Färger för plus och kryss enligt skissen */
-.action-icon.add {
-  color: #4CAF50; /* Grönt plus */
-}
-
 .action-icon.remove {
   color: #F44336; /* Rött kryss */
+}
+
+.action-icon.remove:hover {
+  color: #F44336;
+  opacity: 1;
 }
 
 @media (min-width: 768px) {
@@ -209,5 +214,24 @@
 
   .saved-list > .dish-card {
     max-width: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .saved-list .dish-card-actions {
+    top: auto;
+    right: 0;
+    bottom: 8px;
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .compact-actions {
+    justify-content: center;
+  }
+
+  .saved-list .dish-card-content {
+    padding-bottom: 48px;
   }
 }

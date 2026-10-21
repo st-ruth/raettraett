@@ -310,5 +310,13 @@
     "preferredDays": "both",
     "proteinType": "mince",
     "id": "31ccc437-51bf-4386-be47-869f5d2e93c6"
+  },
+  {
+    "title": "KarlJohan Pasta",
+    "preferredDays": "both",
+    "proteinType": "mushroom",
+    "category": "Husman",
+    "carbType": "pasta",
+    "id": "34fab932-bd22-4d7b-8073-a562a8cd9344"
   }
 ]
