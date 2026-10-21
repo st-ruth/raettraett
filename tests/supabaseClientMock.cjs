@@ -13,6 +13,7 @@ const sharedDishes = [
   },
 ];
 const userDishStatuses = [];
+const mealPlanDays = [];
 let nextDishId = 42;
 let statusWriteError = null;
 let signupResult = { data: { user: null, session: null }, error: null };
@@ -24,6 +25,7 @@ const authStateListeners = new Set();
 
 const resetSupabaseMock = () => {
   userDishStatuses.length = 0;
+  mealPlanDays.length = 0;
   nextDishId = 42;
   statusWriteError = null;
   signupResult = { data: { user: null, session: null }, error: null };
@@ -149,6 +151,73 @@ const supabase = {
               return query;
             },
             then: (resolve, reject) => Promise.resolve({ error: null }).then(resolve, reject),
+          };
+          return query;
+        },
+      };
+    }
+
+    if (table === 'meal_plan_days') {
+      return {
+        select: () => {
+          const filters = {};
+          const query = {
+            eq: (column, value) => {
+              filters[column] = value;
+              return query;
+            },
+            order: (column, options) => {
+              query.orderColumn = column;
+              query.ascending = options?.ascending !== false;
+              return query;
+            },
+            then: (resolve, reject) => {
+              const data = mealPlanDays
+                .filter(row => Object.entries(filters).every(([column, value]) => row[column] === value))
+                .sort((first, second) => {
+                  const comparison = String(first[query.orderColumn] ?? '')
+                    .localeCompare(String(second[query.orderColumn] ?? ''));
+                  return query.ascending ? comparison : -comparison;
+                });
+              return Promise.resolve({ data, error: null }).then(resolve, reject);
+            },
+          };
+          return query;
+        },
+        upsert: async rows => {
+          for (const row of rows) {
+            const index = mealPlanDays.findIndex(existing =>
+              existing.user_id === row.user_id && existing.plan_date === row.plan_date
+            );
+            if (index >= 0) mealPlanDays[index] = row;
+            else mealPlanDays.push(row);
+          }
+          return { error: null };
+        },
+        delete: () => {
+          const filters = {};
+          let dateAfter = null;
+          const query = {
+            eq: (column, value) => {
+              filters[column] = value;
+              return query;
+            },
+            gt: (column, value) => {
+              if (column === 'plan_date') dateAfter = value;
+              return query;
+            },
+            then: (resolve, reject) => {
+              for (let index = mealPlanDays.length - 1; index >= 0; index--) {
+                const row = mealPlanDays[index];
+                if (
+                  Object.entries(filters).every(([column, value]) => row[column] === value) &&
+                  (dateAfter === null || row.plan_date > dateAfter)
+                ) {
+                  mealPlanDays.splice(index, 1);
+                }
+              }
+              return Promise.resolve({ error: null }).then(resolve, reject);
+            },
           };
           return query;
         },

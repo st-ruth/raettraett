@@ -276,12 +276,12 @@ export function DishProvider({ children }: { children: ReactNode }) {
     ? mealPlanState.plan
     : EMPTY_MEAL_PLAN;
 
-  const commitMealPlan = (nextPlan: MealPlanDay[]) => {
+  const commitMealPlan = useCallback((nextPlan: MealPlanDay[]) => {
     if (!user) return;
     setMealPlanState({ userId: user.id, plan: nextPlan });
-  };
+  }, [user]);
 
-  const persistMealPlan = async (days: MealPlanDay[], trimAfter?: string) => {
+  const persistMealPlan = useCallback(async (days: MealPlanDay[], trimAfter?: string) => {
     if (!user) return;
     try {
       await saveMealPlanDays(user.id, days);
@@ -293,7 +293,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
         type: 'error',
       });
     }
-  };
+  }, [user]);
 
   // Hämta sparad matsedel när användaren är inloggad och recepten är laddade.
   useEffect(() => {
@@ -385,7 +385,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
       void persistMealPlan(changedDays);
     }
     return true;
-  }, [requireAuth, user, mealPlan]);
+  }, [commitMealPlan, persistMealPlan, requireAuth, user, mealPlan]);
 
   const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
     setDishActionNotice(null);
