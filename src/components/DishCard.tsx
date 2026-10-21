@@ -1,4 +1,4 @@
-import '../styles/dishCard.css';
+import '../styles/dishcard.css';
 import type { ReactNode } from 'react';
 import { Clock, Ghost, Hourglass } from 'lucide-react';
 import type { Dish } from '../types/dish';
