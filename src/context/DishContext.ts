@@ -14,7 +14,7 @@ export interface DishContextType {
   currentDish: Dish | null; 
   randomizeDish: () => void;
   addDish: (newDish: Omit<Dish, 'id'>) => Promise<Dish | null>;
-  updateDishStatus: (id: string, newStatus: DishStatus | undefined) => Promise<void>;
+  updateDishStatus: (id: string, newStatus: DishStatus | undefined) => Promise<boolean>;
   mealPlan: MealPlanDay[];
   updateMealPlanDay: (updatedDay: MealPlanDay) => void;
   randomizeMealPlanDay: (date: string) => void;

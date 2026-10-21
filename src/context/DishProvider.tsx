@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
@@ -268,10 +268,13 @@ export function DishProvider({ children }: { children: ReactNode }) {
     return generateFullPlan([], [], {});
   });
 
-  const updateDishStatus = async (id: string, newStatus: DishStatus | undefined) => {
+  const updateDishStatus = useCallback(async (
+    id: string,
+    newStatus: DishStatus | undefined
+  ): Promise<boolean> => {
     setDishActionNotice(null);
-    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
-    if (!user) return;
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return false;
+    if (!user) return false;
 
     try {
       const result = newStatus
@@ -293,7 +296,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
           message: `Kunde inte spara ändringen i din lista: ${result.error.message}`,
           type: 'error',
         });
-        return;
+        return false;
       }
     } catch (error) {
       console.error('Ett oväntat fel inträffade när personlig maträttsstatus sparades:', error);
@@ -301,7 +304,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
         message: 'Ett oväntat fel inträffade när ändringen i din lista skulle sparas.',
         type: 'error',
       });
-      return;
+      return false;
     }
 
     const nextStatuses = { ...userDishStatusesRef.current };
@@ -326,7 +329,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
         )
       );
     }
-  };
+    return true;
+  }, [requireAuth, user]);
 
   const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
     setDishActionNotice(null);

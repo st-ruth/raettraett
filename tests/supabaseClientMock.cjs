@@ -14,16 +14,23 @@ const sharedDishes = [
 ];
 const userDishStatuses = [];
 let nextDishId = 42;
+let statusWriteError = null;
 
 const resetSupabaseMock = () => {
   userDishStatuses.length = 0;
   nextDishId = 42;
+  statusWriteError = null;
 };
 
 globalThis.__resetSupabaseMock = resetSupabaseMock;
+globalThis.__setStatusWriteError = error => {
+  statusWriteError = error;
+};
 
 const supabase = {
   auth: {
+    signInWithPassword: async () => ({ error: { message: 'Ogiltiga inloggningsuppgifter.' } }),
+    signUp: async () => ({ error: null }),
     getSession: async () => ({
       data: {
         session: {
@@ -85,6 +92,7 @@ const supabase = {
           return query;
         },
         upsert: async (row) => {
+          if (statusWriteError) return { error: statusWriteError };
           const index = userDishStatuses.findIndex(existing =>
             existing.user_id === row.user_id && existing.dish_id === row.dish_id
           );

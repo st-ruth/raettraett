@@ -11,6 +11,7 @@ import type { Dish } from '../src/types/dish';
 import type { User } from '@supabase/supabase-js';
 
 jest.unstable_mockModule('lucide-react', () => ({
+  X: () => null,
   Dices: () => null,
   MessageSquareMore: () => null,
   Clock: () => null,
@@ -23,6 +24,7 @@ jest.unstable_mockModule('lucide-react', () => ({
 
 const { default: Home } = await import('../src/pages/Home');
 const { default: Randomizer } = await import('../src/pages/Randomizer');
+const { default: AuthModal } = await import('../src/components/AuthModal');
 
 const testUser = {
   id: 'test-user-id',
@@ -49,9 +51,21 @@ function makeDish(
   return { id, title, proteinType, preferredDays: 'both', isQuick };
 }
 
+function DishActionNotice() {
+  const { dishActionNotice } = useDishContext();
+  return dishActionNotice ? (
+    <p role={dishActionNotice.type === 'error' ? 'alert' : 'status'}>
+      {dishActionNotice.message}
+    </p>
+  ) : null;
+}
+
 const resetSupabaseMock = (globalThis as typeof globalThis & {
   __resetSupabaseMock?: () => void;
 }).__resetSupabaseMock;
+const setStatusWriteError = (globalThis as typeof globalThis & {
+  __setStatusWriteError?: (error: { message: string }) => void;
+}).__setStatusWriteError;
 let originalFetchDescriptor: PropertyDescriptor | undefined;
 
 interface MockFetchResponse {
@@ -103,6 +117,41 @@ afterEach(() => {
 });
 
 describe('rättRätt-enhetstester', () => {
+  it('återställer AuthModal efter stängning och rensar formulärfel vid lägesbyte', async () => {
+    const onClose = jest.fn();
+    const renderAuthModal = (isOpen: boolean) =>
+      isOpen ? <AuthModal isOpen onClose={onClose} /> : null;
+    const { rerender } = render(renderAuthModal(true));
+
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: 'gammal@exempel.se' },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secret-password' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Logga in' }));
+    expect(await screen.findByText(/Fel vid inloggning/)).toBeTruthy();
+
+    fireEvent.click(screen.getByText('Har du inget konto? Skapa ett här.'));
+    expect(screen.queryByText(/Fel vid inloggning/)).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Skapa konto' })).toBeTruthy();
+
+    rerender(renderAuthModal(false));
+    rerender(renderAuthModal(true));
+    expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('');
+    expect(screen.getByLabelText('E-post').getAttribute('placeholder')).toBe('namn@exempel.se');
+    expect((screen.getByLabelText('Lösenord') as HTMLInputElement).value).toBe('');
+    expect(screen.getByRole('heading', { name: 'Logga in' })).toBeTruthy();
+
+    fireEvent.change(screen.getByLabelText('E-post'), {
+      target: { value: 'gammal@exempel.se' },
+    });
+    fireEvent.change(screen.getByLabelText('Lösenord'), {
+      target: { value: 'secret-password' },
+    });
+    expect((screen.getByLabelText('E-post') as HTMLInputElement).value).toBe('gammal@exempel.se');
+  });
+
   it('filtrerar maträtter på proteintyp och snabblagat samtidigt', () => {
     const dishes = [
       makeDish('chicken-fast', 'Snabb kyckling', 'chicken', true),
@@ -166,6 +215,44 @@ describe('rättRätt-enhetstester', () => {
 
     const errorMessage = await screen.findByRole('alert');
     expect(errorMessage.textContent).toContain('Recepten kunde inte hämtas från servern.');
+  });
+
+  it('går inte vidare till nästa rätt när statusen inte kan sparas', async () => {
+    setStatusWriteError?.({ message: 'Databasen är tillfälligt otillgänglig.' });
+
+    render(
+      <AuthContext.Provider value={authenticatedTestContext}>
+        <DishProvider>
+          <Randomizer />
+          <DishActionNotice />
+        </DishProvider>
+      </AuthContext.Provider>,
+    );
+
+    expect(await screen.findByText('JSON-rätt')).toBeTruthy();
+    const random = jest.spyOn(Math, 'random').mockReturnValue(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, spara rätten som ja' }));
+
+    const errorMessage = await screen.findByRole('alert');
+    expect(errorMessage.textContent).toContain('Databasen är tillfälligt otillgänglig.');
+    expect(screen.getByText('JSON-rätt')).toBeTruthy();
+    expect(random).not.toHaveBeenCalled();
+  });
+
+  it('går vidare till nästa rätt efter en lyckad statussparning', async () => {
+    render(
+      <AuthContext.Provider value={authenticatedTestContext}>
+        <DishProvider>
+          <Randomizer />
+        </DishProvider>
+      </AuthContext.Provider>,
+    );
+
+    expect(await screen.findByText('JSON-rätt')).toBeTruthy();
+    jest.spyOn(Math, 'random').mockReturnValue(0);
+    fireEvent.click(screen.getByRole('button', { name: 'Ja, spara rätten som ja' }));
+
+    expect(await screen.findByText('Inte i JA-listan')).toBeTruthy();
   });
 
   it('slumpar på startsidan endast bland rätter som markerats JA personligen', async () => {

@@ -20,6 +20,11 @@ export default function Header() {
     clearAuthPrompt();
   };
 
+  const handleSignOut = async () => {
+    closeAuthModal();
+    await signOut();
+  };
+
   return (
     <header className="header-container">
       <div className="header-brand-control">
@@ -50,7 +55,7 @@ export default function Header() {
             <button
               type="button"
               className="mode-button"
-              onClick={signOut}
+              onClick={handleSignOut}
               aria-label="Logga ut"
               title="Logga ut"
             >
@@ -70,11 +75,13 @@ export default function Header() {
         )}
       </div>
 
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={closeAuthModal}
-        notice={authPrompt ?? undefined}
-      />
+      {isAuthModalOpen && (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={closeAuthModal}
+          notice={authPrompt ?? undefined}
+        />
+      )}
     </header>
   );
 }

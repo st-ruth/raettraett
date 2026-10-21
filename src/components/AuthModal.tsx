@@ -58,7 +58,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Din e-post"
+              placeholder="namn@exempel.se"
               required
             />
           </div>
@@ -82,7 +82,10 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
             {isLoginMode ? 'Logga in' : 'Registrera dig'}
           </button>
 
-          <p className="auth-mode-toggle" onClick={() => setIsLoginMode(!isLoginMode)}>
+          <p className="auth-mode-toggle" onClick={() => {
+            setIsLoginMode(!isLoginMode);
+            setMessage('');
+          }}>
             {isLoginMode ? 'Har du inget konto? Skapa ett här.' : 'Har du redan ett konto? Logga in.'}
           </p>
 

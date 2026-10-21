@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../services/supabaseClient';
@@ -30,11 +30,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut();
   };
 
-  const requireAuth = (message: string) => {
+  const requireAuth = useCallback((message: string) => {
     if (user) return true;
     setAuthPrompt(message);
     return false;
-  };
+  }, [user]);
 
   return (
     <AuthContext.Provider

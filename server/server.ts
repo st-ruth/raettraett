@@ -138,7 +138,7 @@ app.post('/api/dishes', async (req, res) => {
     if (insertError?.code === '23505') {
       const { data: duplicate, error: duplicateError } = await userSupabase
         .from('shared_dishes')
-        .select('*')
+        .select('id, title, category, protein_type, preferred_days, carb_type, is_quick, is_slow_cooked')
         .eq('normalized_title', normalizedTitle)
         .single();
       if (duplicateError) {

@@ -78,7 +78,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
         <div className="month-modal-header">
           <div className="month-modal-heading">
             <span aria-hidden="true">&lt;</span>
-            <h2 id={titleId}>v.39-v43</h2>
+            <h2 id={titleId}>Matsedel</h2>
           </div>
 
           <button
@@ -116,6 +116,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                 className={`grid-cell ${isPast ? 'past-day' : ''} ${isToday ? 'today' : ''}`}
                 onClick={() => {
                   if (requireAuth(AUTH_REQUIRED_MESSAGE)) setSelectedDate(date);
+                  else onClose();
                 }}
                 aria-label={`${date.toLocaleDateString('sv-SE', {
                   weekday: 'long',
@@ -186,9 +187,12 @@ export default function MonthModal({ onClose }: MonthModalProps) {
           <button
             type="button"
             className="month-randomize-btn"
-            onClick={randomizeMealPlan}
+            onClick={() => {
+              if (requireAuth(AUTH_REQUIRED_MESSAGE)) randomizeMealPlan();
+              else onClose();
+            }}
           >
-            SLUMPA NY
+            SLUMPA
           </button>
         </div>
 
