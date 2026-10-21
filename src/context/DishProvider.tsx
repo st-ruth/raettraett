@@ -7,6 +7,7 @@ import { supabase } from '../services/supabaseClient';
 import { createDish, fetchDishes } from '../services/api';
 import { useAuth } from './useAuth';
 import { AUTH_REQUIRED_MESSAGE } from './AuthContext';
+import { fetchMealPlan, saveMealPlanDays, deleteMealPlanAfter } from '../services/mealplanapi';
 
 const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
 const dishStatusOptions = ['yes', 'no', 'maybe'] as const;
@@ -79,6 +80,8 @@ const parseStatusRow = (value: unknown): [string, DishStatus] | null => {
     ? [dishId, status]
     : null;
 };
+
+const EMPTY_MEAL_PLAN: MealPlanDay[] = [];
 
 // --- HJÄLPFUNKTION: Bygger ut matsedeln till 35 dagar ---
 const generateFullPlan = (
@@ -263,10 +266,59 @@ export function DishProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  // Vi startar med en helt tom 35-dagarsplan istället för mockMealPlan
-  const [mealPlan, setMealPlan] = useState<MealPlanDay[]>(() => {
-    return generateFullPlan([], [], {});
-  });
+  // Samma mönster som för recept och statusar: planen hör till en användare,
+  // så en utloggad eller ny användare ser aldrig någon annans matsedel.
+  const [mealPlanState, setMealPlanState] = useState<{
+    userId: string | null;
+    plan: MealPlanDay[];
+  }>({ userId: null, plan: EMPTY_MEAL_PLAN });
+  const mealPlan = mealPlanState.userId === currentUserId
+    ? mealPlanState.plan
+    : EMPTY_MEAL_PLAN;
+
+  const commitMealPlan = (nextPlan: MealPlanDay[]) => {
+    if (!user) return;
+    setMealPlanState({ userId: user.id, plan: nextPlan });
+  };
+
+  const persistMealPlan = async (days: MealPlanDay[], trimAfter?: string) => {
+    if (!user) return;
+    try {
+      await saveMealPlanDays(user.id, days);
+      if (trimAfter) await deleteMealPlanAfter(user.id, trimAfter);
+    } catch (error) {
+      console.error('Kunde inte spara matsedeln:', error);
+      setDishActionNotice({
+        message: 'Matsedeln ändrades men kunde inte sparas. Försök igen.',
+        type: 'error',
+      });
+    }
+  };
+
+  // Hämta sparad matsedel när användaren är inloggad och recepten är laddade.
+  useEffect(() => {
+    if (!user || dishesLoading || dishesError) return;
+
+    let isCurrentRequest = true;
+
+    fetchMealPlan(user.id, dishes)
+      .then(plan => {
+        if (isCurrentRequest) setMealPlanState({ userId: user.id, plan });
+      })
+      .catch(error => {
+        if (!isCurrentRequest) return;
+        console.error('Kunde inte hämta matsedeln:', error);
+        setDishActionNotice({
+          message: 'Kunde inte hämta din sparade matsedel.',
+          type: 'error',
+        });
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [user, dishes, dishesLoading, dishesError]);
+
 
   const updateDishStatus = useCallback(async (
     id: string,
@@ -321,16 +373,19 @@ export function DishProvider({ children }: { children: ReactNode }) {
       const offset = today.getTimezoneOffset() * 60000;
       const todayStr = new Date(today.getTime() - offset).toISOString().slice(0, 10);
 
-      setMealPlan(prevPlan =>
-        prevPlan.map(day =>
-          day.date >= todayStr
-            ? { ...day, recipes: day.recipes.filter(recipe => recipe.id !== id) }
-            : day
-        )
-      );
+      const changedDays: MealPlanDay[] = [];
+      const nextPlan = mealPlan.map(day => {
+        if (day.date < todayStr || !day.recipes.some(recipe => recipe.id === id)) return day;
+        const updatedDay = { ...day, recipes: day.recipes.filter(recipe => recipe.id !== id) };
+        changedDays.push(updatedDay);
+        return updatedDay;
+      });
+
+      commitMealPlan(nextPlan);
+      void persistMealPlan(changedDays);
     }
     return true;
-  }, [requireAuth, user]);
+  }, [requireAuth, user, mealPlan]);
 
   const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
     setDishActionNotice(null);
@@ -424,21 +479,20 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const updateMealPlanDay = (updatedDay: MealPlanDay) => {
-    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE) || !user) return;
 
-    setMealPlan(prevPlan => {
-      const dayExists = prevPlan.some(day => day.date === updatedDay.date);
-      if (dayExists) {
-        return prevPlan.map(day => day.date === updatedDay.date ? updatedDay : day);
-      } else {
-        return [...prevPlan, updatedDay].sort((a, b) => a.date.localeCompare(b.date));
-      }
-    });
+    const dayExists = mealPlan.some(day => day.date === updatedDay.date);
+    const nextPlan = dayExists
+      ? mealPlan.map(day => day.date === updatedDay.date ? updatedDay : day)
+      : [...mealPlan, updatedDay].sort((a, b) => a.date.localeCompare(b.date));
+
+    commitMealPlan(nextPlan);
+    void persistMealPlan([updatedDay]);
   };
 
   const randomizeMealPlanDay = (date: string) => {
     setDishActionNotice(null);
-    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE) || !user) return;
 
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
@@ -449,32 +503,32 @@ export function DishProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    const existingDay = mealPlan.find(day => day.date === date);
+    if (existingDay?.status === 'locked') return;
+
     const randomDish = yesDishes[Math.floor(Math.random() * yesDishes.length)];
-    setMealPlan(prevPlan => {
-      const existingDay = prevPlan.find(day => day.date === date);
-      if (existingDay?.status === 'locked') return prevPlan;
+    const dayDate = new Date(`${date}T12:00:00`);
+    const updatedDay: MealPlanDay = {
+      ...(existingDay ?? {
+        id: date,
+        date,
+        dayOfWeek: dayDate.toLocaleDateString('sv-SE', { weekday: 'long' }),
+      }),
+      status: 'generated',
+      recipes: [randomDish],
+    };
 
-      // Parse as a local date to avoid shifting weekdays across time zones.
-      const dayDate = new Date(`${date}T12:00:00`);
-      const updatedDay: MealPlanDay = {
-        ...(existingDay ?? {
-          id: date,
-          date,
-          dayOfWeek: dayDate.toLocaleDateString('sv-SE', { weekday: 'long' }),
-        }),
-        status: 'generated',
-        recipes: [randomDish],
-      };
+    const nextPlan = existingDay
+      ? mealPlan.map(day => day.date === date ? updatedDay : day)
+      : [...mealPlan, updatedDay].sort((a, b) => a.date.localeCompare(b.date));
 
-      return existingDay
-        ? prevPlan.map(day => day.date === date ? updatedDay : day)
-        : [...prevPlan, updatedDay].sort((a, b) => a.date.localeCompare(b.date));
-    });
+    commitMealPlan(nextPlan);
+    void persistMealPlan([updatedDay]);
   };
 
   const randomizeMealPlan = () => {
     setDishActionNotice(null);
-    if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
+    if (!requireAuth(AUTH_REQUIRED_MESSAGE) || !user) return;
 
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
@@ -485,7 +539,18 @@ export function DishProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    setMealPlan(prevPlan => generateFullPlan(prevPlan, dishes, userDishStatusesRef.current));
+    const nextPlan = generateFullPlan(mealPlan, dishes, userDishStatusesRef.current);
+
+    const today = new Date();
+    const offset = today.getTimezoneOffset() * 60000;
+    const todayStr = new Date(today.getTime() - offset).toISOString().slice(0, 10);
+
+    commitMealPlan(nextPlan);
+    // Historik ändras inte, så bara dagar från och med idag sparas.
+    void persistMealPlan(
+      nextPlan.filter(day => day.date >= todayStr),
+      nextPlan[nextPlan.length - 1]?.date
+    );
   };
 
   return (
