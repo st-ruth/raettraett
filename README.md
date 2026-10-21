@@ -2,7 +2,7 @@
 
 rättRätt är en middagsplanerare där användare kan hitta maträtter, slumpa fram matsedlar, spara personliga val och dela egna maträtter med andra användare.
 
-**Publicerad app:** [rättRätt](https://app-tau-nine-19.vercel.app/kalender)
+**Publicerad app:** [rättRätt](https://rattratt.vercel.app)
 **Backend API:** [Render](https://raettraett-api.onrender.com/api/dishes)
 **GitHub:** [Repository](https://github.com/st-ruth/raettraett)
 
