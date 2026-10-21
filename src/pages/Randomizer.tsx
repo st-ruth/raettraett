@@ -1,5 +1,5 @@
 import { Smile, Meh, Angry } from 'lucide-react';
-import DishCard from '../components/DishCard';
+import DishCard from '../components/Dishcard';
 import { useDishContext } from '../context/useDishContext'; 
 import type { DishStatus } from '../types/dish';
 import '../styles/actionButtons.css'; // Din styling bevarad!

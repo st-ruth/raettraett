@@ -4,7 +4,7 @@
 
 import { useNavigate } from 'react-router-dom';
 import { Dices, MessageSquareMore } from 'lucide-react';
-import DishCard from '../components/DishCard';
+import DishCard from '../components/Dishcard';
 import { useDishContext } from '../context/useDishContext';
 import '../styles/actionButtons.css';
 import '../styles/randomizer.css';

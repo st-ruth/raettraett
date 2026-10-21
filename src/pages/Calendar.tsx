@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Ghost, MessageSquareMore } from 'lucide-react';
 import MonthModal from '../components/MonthModal';
-import DishCard from '../components/DishCard';
+import DishCard from '../components/Dishcard';
 import { useDishContext } from '../context/useDishContext'; 
 import '../styles/calendar.css';
 
