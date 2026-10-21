@@ -3,6 +3,7 @@ import cors from 'cors';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import { createClient } from '@supabase/supabase-js';
+import { fileURLToPath } from 'node:url';
 
 dotenv.config();
 
@@ -14,12 +15,22 @@ app.use(express.json());
 const supabaseUrl = process.env.SUPABASE_URL as string;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
+const dishesFilePath = [
+  new URL('./dishes.json', import.meta.url),
+  new URL('../dishes.json', import.meta.url),
+]
+  .map(url => fileURLToPath(url))
+  .find(filePath => fs.existsSync(filePath));
+
+if (!dishesFilePath) {
+  throw new Error('Kunde inte hitta dishes.json bredvid servern eller dess dist-mapp.');
+}
 
 // GET-route: Uppfyller VG-kravet genom att agera mellanhand mot tredjeparts-API (Supabase)
 app.get('/api/dishes', async (req, res) => {
   try {
     // 1. Läs dina hårdkodade bas-rätter från json
-    const jsonData = fs.readFileSync('./dishes.json', 'utf-8');
+    const jsonData = fs.readFileSync(dishesFilePath, 'utf-8');
     const jsonDishes = JSON.parse(jsonData);
 
     // 2. Hämta gemensamma användarskapade rätter från Supabase
@@ -87,14 +98,14 @@ app.post('/api/dishes', (req, res) => {
   }
 
   try {
-    const data = fs.readFileSync('./dishes.json', 'utf-8');
+    const data = fs.readFileSync(dishesFilePath, 'utf-8');
     const dishes: unknown = JSON.parse(data);
     if (!Array.isArray(dishes)) {
       throw new Error('dishes.json innehåller inte en lista.');
     }
 
     dishes.push(newDish);
-    fs.writeFileSync('./dishes.json', JSON.stringify(dishes, null, 2));
+    fs.writeFileSync(dishesFilePath, JSON.stringify(dishes, null, 2));
     res.status(201).json(newDish);
   } catch (error) {
     console.error('Kunde inte spara maträtten i dishes.json:', error);
