@@ -8,6 +8,7 @@ import { useAuth } from './useAuth';
 import { AUTH_REQUIRED_MESSAGE } from './AuthContext';
 
 const preferredDayOptions = ['weekdays', 'weekends', 'both'] as const;
+const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:3000';
 const dishStatusOptions = ['yes', 'no', 'maybe'] as const;
 const carbOptions = [
   'pasta', 'rice', 'potatoes', 'salad', 'bulgur_couscous', 'noodles', 'bread', 'other',
@@ -147,7 +148,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     userDishStatusesRef.current = {};
 
     const fetchDishData = async () => {
-      const dishRequest = fetch('http://localhost:3000/api/dishes')
+      const dishRequest = fetch(`${API_URL}/api/dishes`)
         .then(response => ({ response, error: null }))
         .catch(error => ({ response: null, error }));
       const [dishResult, statusResult] = await Promise.all([
