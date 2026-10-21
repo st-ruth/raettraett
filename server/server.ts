@@ -13,7 +13,7 @@ app.use(express.json());
 
 // Skapa kopplingen till Supabase från backenden
 const supabaseUrl = process.env.SUPABASE_URL as string;
-const supabaseAnonKey = process.env.SUPABASE_ANON_KEY as string;
+const supabaseAnonKey = process.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const dishesFilePath = [
   new URL('./dishes.json', import.meta.url),
