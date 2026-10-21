@@ -4,7 +4,7 @@ import { DishContext } from './DishContext';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';
 import { supabase } from '../services/supabaseClient';
-import { fetchDishes } from '../services/api';
+import { createDish, fetchDishes } from '../services/api';
 import { useAuth } from './useAuth';
 import { AUTH_REQUIRED_MESSAGE } from './AuthContext';
 
@@ -329,43 +329,33 @@ export function DishProvider({ children }: { children: ReactNode }) {
     ) ?? null;
 
     if (!savedDish) {
-      const { data, error } = await supabase
-        .from('shared_dishes')
-        .insert({
-          title: newDish.title.trim(),
-          category: newDish.category ?? null,
-          protein_type: newDish.proteinType,
-          preferred_days: newDish.preferredDays,
-          carb_type: newDish.carbType ?? null,
-          is_quick: newDish.isQuick ?? false,
-          is_slow_cooked: newDish.isSlowCooked ?? false,
-        })
-        .select('*')
-        .single();
-
-      if (error?.code === '23505') {
-        const { data: duplicate, error: duplicateError } = await supabase
-          .from('shared_dishes')
-          .select('*')
-          .eq('normalized_title', normalizedTitle)
-          .single();
-        if (duplicateError) {
-          console.error('Kunde inte hitta den gemensamma maträtten efter en dubblettkonflikt:', duplicateError);
-          alert(`Kunde inte hitta den befintliga maträtten:\n${duplicateError.message}`);
-          return null;
-        }
-        savedDish = parseDish(duplicate);
-      } else if (error) {
-        console.error('Kunde inte spara den gemensamma maträtten:', error);
-        alert(`Maträtten kunde inte sparas i den gemensamma receptbanken:\n${error.message}`);
+      const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError || !sessionData.session || sessionData.session.user.id !== user.id) {
+        const message = sessionError?.message ?? 'Din inloggning kunde inte verifieras.';
+        console.error('Kunde inte verifiera sessionen för att spara en gemensam maträtt:', sessionError ?? message);
+        alert(`Maträtten kunde inte sparas i den gemensamma receptbanken:\n${message}`);
         return null;
-      } else {
+      }
+
+      try {
+        const data = await createDish(
+          {
+            ...newDish,
+            title: newDish.title.trim(),
+          },
+          sessionData.session.access_token,
+        );
         savedDish = parseDish(data);
+      } catch (error) {
+        console.error('Kunde inte spara den gemensamma maträtten via servern:', error);
+        const message = error instanceof Error ? error.message : 'Okänt serverfel.';
+        alert(`Maträtten kunde inte sparas i den gemensamma receptbanken:\n${message}`);
+        return null;
       }
     }
 
     if (!savedDish) {
-      alert('Supabase returnerade en ogiltig maträtt efter sparning.');
+      alert('Servern returnerade en ogiltig maträtt efter sparning.');
       return null;
     }
 

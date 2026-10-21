@@ -23,6 +23,17 @@ const resetSupabaseMock = () => {
 globalThis.__resetSupabaseMock = resetSupabaseMock;
 
 const supabase = {
+  auth: {
+    getSession: async () => ({
+      data: {
+        session: {
+          access_token: 'test-access-token',
+          user: { id: 'test-user-id' },
+        },
+      },
+      error: null,
+    }),
+  },
   from: (table) => {
     if (table === 'shared_dishes') {
       return {

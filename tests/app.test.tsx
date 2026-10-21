@@ -218,13 +218,47 @@ describe('rättRätt-enhetstester', () => {
     expect(screen.queryByText('Inte i JA-listan')).toBeNull();
   });
 
-  it('sparar en ny rätt via Supabase och lägger till den med JA-status', async () => {
+  it('sparar en ny rätt via Express med sessionstoken och lägger till den med JA-status', async () => {
     const newDish = {
       title: 'Hemlagad rätt',
       proteinType: 'fish',
       preferredDays: 'weekends',
       isQuick: true,
     } satisfies Omit<Dish, 'id'>;
+    const requests: Array<{ url: string; init?: RequestInit }> = [];
+    Object.defineProperty(globalThis, 'fetch', {
+      configurable: true,
+      writable: true,
+      value: (input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        requests.push({ url, init });
+        if (init?.method === 'POST') {
+          return Promise.resolve(makeFetchResponse({
+            id: '42',
+            title: 'Hemlagad rätt',
+            protein_type: 'fish',
+            preferred_days: 'weekends',
+            is_quick: true,
+          }, 201));
+        }
+        return Promise.resolve(makeFetchResponse([{
+          id: 'json-dish',
+          title: 'JSON-rätt',
+          proteinType: 'mince',
+          preferredDays: 'weekdays',
+        }, {
+          id: 'not-yes',
+          title: 'Inte i JA-listan',
+          protein_type: 'pork',
+          preferred_days: 'both',
+        }, {
+          id: 'personal-yes',
+          title: 'Min JA-rätt',
+          protein_type: 'chicken',
+          preferred_days: 'both',
+        }]));
+      },
+    });
 
     const wrapper = ({ children }: PropsWithChildren) => (
       <AuthContext.Provider value={authenticatedTestContext}>
@@ -245,6 +279,13 @@ describe('rättRätt-enhetstester', () => {
     expect(createdDish.id).toBe('42');
     expect(result.current.dishes).toContainEqual(createdDish);
     expect(result.current.userDishStatuses[createdDish.id]).toBe('yes');
+    const createRequest = requests.find(request => request.init?.method === 'POST');
+    expect(createRequest?.url).toBe('http://localhost:3000/api/dishes');
+    expect(createRequest?.init?.headers).toEqual({
+      'Content-Type': 'application/json',
+      Authorization: 'Bearer test-access-token',
+    });
+    expect(JSON.parse(String(createRequest?.init?.body))).toEqual(newDish);
   });
 
   it('håller personliga statusar åtskilda mellan användare', async () => {

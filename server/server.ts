@@ -62,7 +62,7 @@ const isChoice = <T extends readonly string[]>(options: T, value: unknown): valu
   typeof value === 'string' && options.some(option => option === value);
 
 const isDish = (value: unknown): value is {
-  id: string;
+  id?: string;
   title: string;
   preferredDays: typeof preferredDayOptions[number];
   proteinType: typeof proteinOptions[number];
@@ -74,9 +74,10 @@ const isDish = (value: unknown): value is {
   typeof value === 'object' &&
   value !== null &&
   !Array.isArray(value) &&
-  'id' in value &&
-  typeof value.id === 'string' &&
-  value.id.trim().length > 0 &&
+  (!('id' in value) || (
+    typeof value.id === 'string' &&
+    value.id.trim().length > 0
+  )) &&
   'title' in value &&
   typeof value.title === 'string' &&
   value.title.trim().length > 0 &&
@@ -89,26 +90,72 @@ const isDish = (value: unknown): value is {
   (!('isQuick' in value) || typeof value.isQuick === 'boolean') &&
   (!('isSlowCooked' in value) || typeof value.isSlowCooked === 'boolean');
 
-// C (CREATE) - Din intakta route för att spara till dishes.json
-app.post('/api/dishes', (req, res) => {
+app.post('/api/dishes', async (req, res) => {
   const newDish: unknown = req.body;
   if (!isDish(newDish)) {
     res.status(400).json({ error: 'Ogiltig maträtt. Kontrollera obligatoriska fält och deras värden.' });
     return;
   }
 
+  const authorization = req.get('authorization');
+  const accessToken = authorization?.startsWith('Bearer ')
+    ? authorization.slice('Bearer '.length).trim()
+    : '';
+  if (!accessToken) {
+    res.status(401).json({ error: 'Du måste vara inloggad för att spara en maträtt.' });
+    return;
+  }
+
   try {
-    const data = fs.readFileSync(dishesFilePath, 'utf-8');
-    const dishes: unknown = JSON.parse(data);
-    if (!Array.isArray(dishes)) {
-      throw new Error('dishes.json innehåller inte en lista.');
+    const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+    if (authError || !authData.user) {
+      res.status(401).json({ error: 'Din inloggning kunde inte verifieras. Logga in igen.' });
+      return;
     }
 
-    dishes.push(newDish);
-    fs.writeFileSync(dishesFilePath, JSON.stringify(dishes, null, 2));
-    res.status(201).json(newDish);
+    const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
+      accessToken: async () => accessToken,
+    });
+    const normalizedTitle = newDish.title.trim().toLowerCase();
+    const { data: savedDish, error: insertError } = await userSupabase
+      .from('shared_dishes')
+      .insert({
+        title: newDish.title.trim(),
+        category: newDish.category ?? null,
+        protein_type: newDish.proteinType,
+        preferred_days: newDish.preferredDays,
+        carb_type: newDish.carbType ?? null,
+        is_quick: newDish.isQuick ?? false,
+        is_slow_cooked: newDish.isSlowCooked ?? false,
+      })
+      .select('*')
+      .single();
+
+    if (insertError?.code === '23505') {
+      const { data: duplicate, error: duplicateError } = await userSupabase
+        .from('shared_dishes')
+        .select('*')
+        .eq('normalized_title', normalizedTitle)
+        .single();
+      if (duplicateError) {
+        console.error('Kunde inte hitta den gemensamma maträtten efter en dubblettkonflikt:', duplicateError);
+        res.status(500).json({ error: 'Kunde inte hitta den befintliga maträtten efter en dubblettkonflikt.' });
+        return;
+      }
+      res.status(200).json(duplicate);
+      return;
+    }
+
+    if (insertError) {
+      console.error('Kunde inte spara den gemensamma maträtten i Supabase:', insertError);
+      const status = insertError.code === '42501' ? 403 : 500;
+      res.status(status).json({ error: 'Ett serverfel hindrade sparningen av maträtten.' });
+      return;
+    }
+
+    res.status(201).json(savedDish);
   } catch (error) {
-    console.error('Kunde inte spara maträtten i dishes.json:', error);
+    console.error('Kunde inte spara maträtten i Supabase:', error);
     res.status(500).json({ error: 'Ett serverfel hindrade sparningen av maträtten.' });
   }
 });
