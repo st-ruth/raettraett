@@ -8,7 +8,11 @@ import { fileURLToPath } from 'node:url';
 dotenv.config();
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: ['https://raettraett.netlify.app', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type'],
+}));
 app.use(express.json());
 
 // Skapa kopplingen till Supabase från backenden
@@ -36,7 +40,7 @@ app.get('/api/dishes', async (req, res) => {
     // 2. Hämta gemensamma användarskapade rätter från Supabase
     const { data: supabaseDishes, error } = await supabase
       .from('shared_dishes')
-      .select('*');
+      .select('id, title, category, protein_type, preferred_days, carb_type, is_quick, is_slow_cooked');
 
     if (error) throw error;
 

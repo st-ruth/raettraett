@@ -150,6 +150,10 @@ export function DishProvider({ children }: { children: ReactNode }) {
     ? userDishStatusState.statuses
     : {};
   const [currentDish, setCurrentDish] = useState<Dish | null>(null);
+  const [dishActionNotice, setDishActionNotice] = useState<{
+    message: string;
+    type: 'error' | 'status';
+  } | null>(null);
 
   useEffect(() => {
     let isCurrentRequest = true;
@@ -265,6 +269,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
   });
 
   const updateDishStatus = async (id: string, newStatus: DishStatus | undefined) => {
+    setDishActionNotice(null);
     if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
     if (!user) return;
 
@@ -284,12 +289,18 @@ export function DishProvider({ children }: { children: ReactNode }) {
 
       if (result.error) {
         console.error('Kunde inte spara personlig maträttsstatus:', result.error);
-        alert(`Kunde inte spara ändringen i din lista:\n${result.error.message}`);
+        setDishActionNotice({
+          message: `Kunde inte spara ändringen i din lista: ${result.error.message}`,
+          type: 'error',
+        });
         return;
       }
     } catch (error) {
       console.error('Ett oväntat fel inträffade när personlig maträttsstatus sparades:', error);
-      alert('Ett oväntat fel inträffade när ändringen i din lista skulle sparas.');
+      setDishActionNotice({
+        message: 'Ett oväntat fel inträffade när ändringen i din lista skulle sparas.',
+        type: 'error',
+      });
       return;
     }
 
@@ -318,6 +329,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const addDish = async (newDish: Omit<Dish, 'id'>): Promise<Dish | null> => {
+    setDishActionNotice(null);
     if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return null;
     if (!user) {
       return null;
@@ -333,7 +345,10 @@ export function DishProvider({ children }: { children: ReactNode }) {
       if (sessionError || !sessionData.session || sessionData.session.user.id !== user.id) {
         const message = sessionError?.message ?? 'Din inloggning kunde inte verifieras.';
         console.error('Kunde inte verifiera sessionen för att spara en gemensam maträtt:', sessionError ?? message);
-        alert(`Maträtten kunde inte sparas i den gemensamma receptbanken:\n${message}`);
+        setDishActionNotice({
+          message: `Maträtten kunde inte sparas i den gemensamma receptbanken: ${message}`,
+          type: 'error',
+        });
         return null;
       }
 
@@ -349,13 +364,19 @@ export function DishProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error('Kunde inte spara den gemensamma maträtten via servern:', error);
         const message = error instanceof Error ? error.message : 'Okänt serverfel.';
-        alert(`Maträtten kunde inte sparas i den gemensamma receptbanken:\n${message}`);
+        setDishActionNotice({
+          message: `Maträtten kunde inte sparas i den gemensamma receptbanken: ${message}`,
+          type: 'error',
+        });
         return null;
       }
     }
 
     if (!savedDish) {
-      alert('Servern returnerade en ogiltig maträtt efter sparning.');
+      setDishActionNotice({
+        message: 'Servern returnerade en ogiltig maträtt efter sparning.',
+        type: 'error',
+      });
       return null;
     }
 
@@ -368,7 +389,10 @@ export function DishProvider({ children }: { children: ReactNode }) {
 
     if (statusError) {
       console.error('Den gemensamma maträtten sparades, men personlig JA-status kunde inte sparas:', statusError);
-      alert(`Maträtten finns i den gemensamma receptbanken, men kunde inte läggas i din JA-lista:\n${statusError.message}`);
+      setDishActionNotice({
+        message: `Maträtten finns i den gemensamma receptbanken, men kunde inte läggas i din JA-lista: ${statusError.message}`,
+        type: 'error',
+      });
       setDishes(prevDishes => prevDishes.some(dish => dish.id === savedDish.id)
         ? prevDishes
         : [savedDish, ...prevDishes]);
@@ -409,11 +433,15 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const randomizeMealPlanDay = (date: string) => {
+    setDishActionNotice(null);
     if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
 
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
-      alert('Du har inga rätter i Ja-listan att slumpa fram!');
+      setDishActionNotice({
+        message: 'Du har inga rätter i Ja-listan att slumpa fram!',
+        type: 'status',
+      });
       return;
     }
 
@@ -441,11 +469,15 @@ export function DishProvider({ children }: { children: ReactNode }) {
   };
 
   const randomizeMealPlan = () => {
+    setDishActionNotice(null);
     if (!requireAuth(AUTH_REQUIRED_MESSAGE)) return;
 
     const yesDishes = dishes.filter(dish => userDishStatusesRef.current[dish.id] === 'yes');
     if (yesDishes.length === 0) {
-      alert('Du har inga rätter i Ja-listan att slumpa fram!');
+      setDishActionNotice({
+        message: 'Du har inga rätter i Ja-listan att slumpa fram!',
+        type: 'status',
+      });
       return;
     }
 
@@ -458,6 +490,8 @@ export function DishProvider({ children }: { children: ReactNode }) {
       userDishStatuses,
       dishesLoading,
       dishesError,
+      dishActionNotice,
+      clearDishActionNotice: () => setDishActionNotice(null),
       currentDish, 
       randomizeDish, 
       addDish,

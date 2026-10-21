@@ -9,6 +9,8 @@ export interface DishContextType {
   userDishStatuses: Record<string, DishStatus>;
   dishesLoading: boolean;
   dishesError: string | null;
+  dishActionNotice: { message: string; type: 'error' | 'status' } | null;
+  clearDishActionNotice: () => void;
   currentDish: Dish | null; 
   randomizeDish: () => void;
   addDish: (newDish: Omit<Dish, 'id'>) => Promise<Dish | null>;
