@@ -157,7 +157,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     message: string;
     type: 'error' | 'status';
   } | null>(null);
-
+//
   useEffect(() => {
     let isCurrentRequest = true;
     userDishStatusesRef.current = {};
@@ -318,7 +318,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     };
   }, [user, dishes, dishesLoading, dishesError]);
 
-
+  // Hantering av personliga maträttsstatusar
   const updateDishStatus = useCallback(async (
     id: string,
     newStatus: DishStatus | undefined

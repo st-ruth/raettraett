@@ -91,6 +91,7 @@
   line-height: 1.1;
   word-break: break-word;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2; 
   -webkit-box-orient: vertical;
 }
@@ -120,6 +121,7 @@
   text-align: center;
   white-space: normal;
   overflow-wrap: anywhere;
+  line-clamp: unset;
   -webkit-line-clamp: unset;
 }
 
@@ -161,6 +163,7 @@
   line-height: 1.1;
   word-break: break-word;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
@@ -292,6 +295,7 @@ body[data-theme="dark"] .strip-arrow {
     font-weight: 400;
     line-height: 1.2;
     text-align: center;
+    line-clamp: unset;
     -webkit-line-clamp: unset;
   }
 
