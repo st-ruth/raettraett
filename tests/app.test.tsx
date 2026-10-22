@@ -519,7 +519,7 @@ describe('rättRätt-enhetstester', () => {
     render(<CalendarAuthHarness initialUser={testUser} />);
     await finishDishLoading();
 
-    fireEvent.click(screen.getByRole('button', { name: '30 DAGAR' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Matsedel' }));
     const heading = await screen.findByRole('heading', { name: 'Matsedel' });
     expect(heading.textContent).toBe('Matsedel');
   });

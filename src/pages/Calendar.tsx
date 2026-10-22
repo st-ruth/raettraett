@@ -330,7 +330,7 @@ export default function CalendarPage() {
 
       <div className="sticky-btn-container">
         <button type="button" className="sticky-month-btn" onClick={() => setIsMonthModalOpen(true)}>
-          30 DAGAR
+          Matsedel
         </button>
       </div>
 
