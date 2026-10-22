@@ -2,7 +2,7 @@
 
 rättRätt är en middagsplanerare där användare kan hitta maträtter, slumpa fram matsedlar, spara personliga val och dela egna maträtter med andra användare.
 
-**Publicerad app:** [rättRätt](https://rattratt.vercel.app)
+**App:** [rättRätt](https://rattratt.vercel.app/)
 **Backend API:** [Render](https://raettraett-api.onrender.com/api/dishes)
 **GitHub:** [Repository](https://github.com/st-ruth/raettraett)
 
@@ -25,10 +25,17 @@ rättRätt är en middagsplanerare där användare kan hitta maträtter, slumpa 
 
 ## Starta lokalt
 
-Du behöver Node.js och npm.
-Vid lokal utveckling krävs miljövariabler för Supabase-anslutningen och backendens API-adress. Inga nyckelvärden eller hemligheter ingår i repot.
+Du behöver Node.js, npm och ett konfigurerat Supabase-projekt.
 
-**1. Starta backend** i en terminal:
+Skapa lokala .env-filer med de miljövariabler som behövs. Lägg inte upp filer som innehåller hemligheter i Git.
+
+**Frontend, i projektroten:**
+`VITE_API_URL`, `VITE_SUPABASE_URL` och `VITE_SUPABASE_PUBLISHABLE_KEY`.
+
+**Backend, i `server/.env`:**
+`SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY` och `PORT`.
+
+Starta backend i en terminal:
 
 ```bash
 cd server
@@ -36,18 +43,18 @@ npm install
 npm run dev
 ```
 
-**2. Starta frontend** i en separat terminal från projektroten:
+Starta frontend i en separat terminal från projektroten:
 
 ```bash
 npm install
 npm run dev
 ```
 
-Frontend öppnas normalt på `http://localhost:5173` och backend körs på `http://localhost:3000`.
+Frontend körs normalt på `http://localhost:5173` och backend på `http://localhost:3000`.
 
 ## Tester
 
-Kör testerna från projektroten:
+Kör från projektroten:
 
 ```bash
 npm test -- --runInBand
