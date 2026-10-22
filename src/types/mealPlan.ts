@@ -1,8 +1,6 @@
-// hur en enskild dag ser ut i  3-dagarsvy, veckodagar & 30dagarsvy.
+import type { Dish } from './dish';
 
-import type { Dish } from "./dish";
-
-export type DayStatus = 'generated' | 'locked' | 'eating_out';  //status för specifik dag i kalendern 
+export type DayStatus = 'generated' | 'locked' | 'eating_out'; 
 
 export interface MealPlanDay {
     id: string;
@@ -10,5 +8,5 @@ export interface MealPlanDay {
     dayOfWeek: string;
     status: DayStatus;
     recipes: Dish[]; 
-    customNote?: string;  //osäker på om jag vill ha detta? 
+    customNote?: string; 
 }

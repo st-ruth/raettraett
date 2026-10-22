@@ -1,3 +1,4 @@
+/* Grundlayout */
 .calendar-page {
   display: flex;
   flex-direction: column;
@@ -5,7 +6,7 @@
   position: relative;
 }
 
-/* --- Top Strip (Matsedel + Rutor) --- */
+/* Veckoremsan */
 .calendar-top-strip {
   padding: 16px;
   background-color: var(--color-ui-transparent);
@@ -50,7 +51,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  aspect-ratio: 1; /* Håller dem fyrkantiga */
+  aspect-ratio: 1; 
   background-color: var(--color-ui);
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -67,7 +68,6 @@
   outline-offset: -3px;
 }
 
-/* Bokstaven för veckodagen */
 .day-letter {
   font-size: 0.75rem;
   width: 24px;
@@ -79,13 +79,11 @@
   margin-bottom: auto;
 }
 
-/* Om dagen är det faktiska datumet "idag", fyll cirkeln */
 .day-letter.is-today {
   background-color: #111;
   color: var(--color-white);
 }
 
-/* Den pyttelilla texten för maträtten i strippen */
 .strip-dish-title {
   font-size: 0.5rem;
   text-transform: uppercase;
@@ -93,7 +91,7 @@
   line-height: 1.1;
   word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Tillåter max 2 rader text */
+  -webkit-line-clamp: 2; 
   -webkit-box-orient: vertical;
 }
 
@@ -149,21 +147,13 @@
   white-space: nowrap;
 }
 
-@media (max-width: 767px) {
-  .strip-box {
-    aspect-ratio: auto;
-    min-height: 76px;
-    padding: 6px 3px 22px;
-    overflow: visible;
-  }
-
-  .strip-box .day-letter {
-    flex: 0 0 auto;
-    margin-bottom: 0;
-  }
+.strip-box.scrolled-active {
+  border: 2px solid var(--text-color, #111);
+  background-color: var(--color-inactive, rgba(255, 255, 255, 0.2)); 
+  transform: scale(1.05);
 }
 
-/* CSS för den lilla texten i 7-dagarsstrippen */
+/* Maträttstext i veckoremsan */
 .dish-card-strip {
   font-size: 0.5rem;
   text-transform: uppercase;
@@ -171,13 +161,13 @@
   line-height: 1.1;
   word-break: break-word;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Tillåter max 2 rader text innan den klipper med ... */
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   color: #111;
 }
 
-/* --- Dagskorten --- */
+/* Dagskorten */
 .calendar-day-card {
   scroll-margin-top: 140px;
 }
@@ -224,20 +214,20 @@
 }
 
 .calendar-cards-container {
-  padding: 0 16px 100px 16px; /* Extra padding i botten så korten inte fastnar under knappen */
+  padding: 0 16px 100px 16px; 
   display: flex;
   flex-direction: column;
-  gap: 0.5px; /* Tätt mellanrum enligt skiss */
+  gap: 0.5px; 
   overflow-y: auto;
 }
 
-/* --- Sticky Bottenknapp --- */
+/* Månadsknapp */
 .sticky-month-btn {
   position: fixed;
-  bottom: 50px; /* Justera denna så den ligger lagom högt ovanför din navbar */
+  bottom: 50px; 
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--color-ink); /* Mörksvart */
+  background-color: var(--color-ink); 
   color: var(--color-white);
   border: none;
   padding: 12px 180px;
@@ -249,13 +239,7 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Den ruta som vi tittar på i listan just nu (Infinity Scroll markören) */
-.strip-box.scrolled-active {
-  border: 2px solid var(--text-color, #111);
-  background-color: var(--color-inactive, rgba(255, 255, 255, 0.2)); 
-  transform: scale(1.05); /* En liten förstoring för att tydliggöra */
-}
-
+/* Mörkt tema */
 body[data-theme="dark"] .strip-box {
   color: var(--color-white);
 }
@@ -269,7 +253,7 @@ body[data-theme="dark"] .strip-arrow {
   color: var(--color-white);
 }
 
-/* Desktop-justeringar (Tablets och datorer) */
+/* Desktop */
 @media (min-width: 768px) {
   .strip-dish-title-mobile {
     display: none;
@@ -338,18 +322,32 @@ body[data-theme="dark"] .strip-arrow {
     max-width: none;
   }
 
-
-.dish-card-strip {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  font-size: 1rem; 
-  font-weight: 400;
-  text-transform: uppercase;
-  line-height: 1.3;
-  text-align: center;
-  overflow: hidden;
+  .dish-card-strip {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    font-size: 1rem; 
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 1.3;
+    text-align: center;
+    overflow: hidden;
+  }
 }
+
+/* Mobil */
+@media (max-width: 767px) {
+  .strip-box {
+    aspect-ratio: auto;
+    min-height: 76px;
+    padding: 6px 3px 22px;
+    overflow: visible;
+  }
+
+  .strip-box .day-letter {
+    flex: 0 0 auto;
+    margin-bottom: 0;
+  }
 }

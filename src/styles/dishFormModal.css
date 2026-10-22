@@ -1,4 +1,4 @@
-/* Receptformulärets fält */
+/* Formulärfält */
 .dish-form {
   display: flex;
   flex-direction: column;
@@ -39,7 +39,7 @@
   color: rgba(255, 255, 255, 0.75);
 }
 
-/* Kryssrutorna */
+/* Kryssrutor & radioknappar */
 .form-checkboxes {
   display: flex;
   flex-direction: column;
@@ -79,7 +79,7 @@
   accent-color: var(--color-ui);
 }
 
-/* Required-field note */
+/* Obligatoriska fält */
 .required-fields-note {
   margin: 12px 0 0;
   color: var(--color-white);

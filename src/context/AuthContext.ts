@@ -12,5 +12,4 @@ export interface AuthContextType {
 
 export const AUTH_REQUIRED_MESSAGE = 'Du måste logga in för att spara din matsedel!';
 
-// Skapar själva Contexten
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);

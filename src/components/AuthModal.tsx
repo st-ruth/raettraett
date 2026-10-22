@@ -14,7 +14,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [message, setMessage] = useState('');
-  const [isLoginMode, setIsLoginMode] = useState(true); // Togglar mellan inloggning/registrering
+  const [isLoginMode, setIsLoginMode] = useState(true); // Inloggning-& registreringsläge
 
   if (!isOpen) return null;
 
@@ -35,7 +35,7 @@ export default function AuthModal({ isOpen, onClose, notice }: AuthModalProps) {
       if (error) setMessage('Fel vid inloggning: ' + error.message);
       else {
         setMessage('Inloggad!');
-        setTimeout(handleClose, 1500); // Stäng modalen automatiskt efter en kort stund
+        setTimeout(handleClose, 1500); // Stäng modalen efter lyckad inloggning
       }
     } else {
       const { data, error } = await supabase.auth.signUp({ email, password });

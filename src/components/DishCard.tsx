@@ -10,7 +10,7 @@ interface DishCardProps {
   dateLabel?: string;
   showClockBadge?: boolean;
   showGhostBadge?: boolean;
-  variant?: 'hero' | 'calendar' | 'compact' | 'strip'; // 'strip' tillagd här!
+  variant?: 'hero' | 'calendar' | 'compact' | 'strip'; 
   children?: ReactNode;
 }
 
@@ -25,7 +25,7 @@ function DishCard({
   children
 }: DishCardProps) {
   
-  // 1. Om komponenten används uppe i den lilla kalender-strippen
+  // Kompakt rendering i kalenderremsan 
   if (variant === 'strip' && dish) {
     return (
       <span className="dish-card-strip" title={dish.title}>
@@ -34,7 +34,7 @@ function DishCard({
     );
   }
 
-  // 2. Standard-rendering för stora kort (calendar, hero, compact)
+  // Standardrendering för stora kort (calendar, hero, compact)
   return (
     <div className={`dish-card ${variant} ${recipes && recipes.length > 1 ? 'dish-card-with-recipes' : ''}`}>
       {dateLabel && <span className="dish-card-date">{dateLabel}</span>}

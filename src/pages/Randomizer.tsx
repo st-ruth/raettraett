@@ -3,7 +3,7 @@ import DishCard from '../components/DishCard';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
 import type { DishStatus } from '../types/dish';
-import '../styles/actionButtons.css'; // Din styling bevarad!
+import '../styles/actionButtons.css';
 import '../styles/randomizer.css'; 
 
 export default function Randomizer() {
@@ -18,7 +18,6 @@ export default function Randomizer() {
   } = useDishContext();
   const { requireAuth } = useAuth();
 
-  // Tar nu emot engelska statusar för att matcha databasen
   const handleAction = (newStatus: DishStatus) => {
     clearDishActionNotice();
     if (!requireAuth('Du måste logga in för att testa slumpgeneratorn!')) return;
@@ -46,7 +45,7 @@ export default function Randomizer() {
     );
   }
 
-  // Säkerhetsnät om man swipat bort alla kort
+  // Visa ett slutläge när inga fler rätter finns att visa
   if (!currentDish) {
     return (
       <div className="randomizer-container">
@@ -69,17 +68,14 @@ export default function Randomizer() {
       <DishCard dish={currentDish} variant="hero">
         <div className="randomizer-actions">
           
-          {/* Vänster: Nej */}
           <button type="button" className="action-btn no" onClick={() => handleAction('no')} aria-label="Nej, visa inte den här rätten">
             <Angry size={28} aria-hidden="true" />
           </button>
           
-          {/* Mitten: Kanske (skickar 'maybe') */}
           <button type="button" className="action-btn maybe" onClick={() => handleAction('maybe')} aria-label="Kanske, spara rätten som kanske">
             <Meh size={28} aria-hidden="true" />
           </button>
 
-          {/* Höger: Ja (skickar 'yes') */}
           <button type="button" className="action-btn yes" onClick={() => handleAction('yes')} aria-label="Ja, spara rätten som ja">
             <Smile size={28} aria-hidden="true" />
           </button>

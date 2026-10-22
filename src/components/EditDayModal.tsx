@@ -20,7 +20,7 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
 
   if (!isOpen) return null;
 
-  // Lägg till en slumpad rätt
+  // Slumpa in extra rätt
   const handleAddRandomDish = () => {
     const yesDishes = dishes.filter(dish => userDishStatuses[dish.id] === 'yes');
 
@@ -35,7 +35,7 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
     setCurrentRecipes([...currentRecipes, randomDish]);
   };
 
-  // Byt ut en specifik rätt mot en ny slumpad
+  // Byt ut en rätt mot en annan
   const handleSwapDish = (indexToSwap: number) => {
     const yesDishes = dishes.filter(dish =>
       userDishStatuses[dish.id] === 'yes' && dish.id !== currentRecipes[indexToSwap]?.id
@@ -49,7 +49,7 @@ export default function EditDayModal({ day, isOpen, onClose, onSave }: EditDayMo
     // eslint-disable-next-line react-hooks/purity
     const randomDish = yesDishes[Math.floor(Math.random() * yesDishes.length)];
     
-    // Kopiera arrayen och byt ut just den rätten
+    // Kopiera listan och byt ut den valda rätten
     const newRecipes = [...currentRecipes];
     newRecipes[indexToSwap] = randomDish;
     

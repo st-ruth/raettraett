@@ -1,4 +1,4 @@
-// Läs och skriv matsedeln i Supabase. Läggs i src/services/mealPlanApi.ts
+// Hanterar hämtning, sparning och rensning av matsedeln i Supabase
 import { supabase } from '../services/supabaseClient';
 import type { Dish } from '../types/dish';
 import type { DayStatus, MealPlanDay } from '../types/mealPlan';
@@ -13,7 +13,7 @@ interface MealPlanRow {
 const isDayStatus = (value: unknown): value is DayStatus =>
   value === 'generated' || value === 'locked' || value === 'eating_out';
 
-// Vi litar inte blint på databassvaret, utan validerar varje rad.
+// Kontrollera att varje rad från databasen har förväntat format
 const isMealPlanRow = (value: unknown): value is MealPlanRow => {
   if (typeof value !== 'object' || value === null) return false;
   const row = value as Record<string, unknown>;
@@ -30,12 +30,12 @@ const isMealPlanRow = (value: unknown): value is MealPlanRow => {
 const rowToDay = (row: MealPlanRow, dishesById: Map<string, Dish>): MealPlanDay => ({
   id: row.plan_date,
   date: row.plan_date,
-  // Lokal tid mitt på dagen, så att veckodagen inte förskjuts av tidszoner.
+  // Lokal tid mitt på dagen, så att veckodagen inte förskjuts av tidszoner
   dayOfWeek: new Date(`${row.plan_date}T12:00:00`).toLocaleDateString('sv-SE', {
     weekday: 'long',
   }),
   status: row.status,
-  // Rätter som tagits bort sedan matsedeln sparades hoppas över.
+  // Rätter som tagits bort sedan matsedeln sparades hoppas över
   recipes: row.recipe_ids.flatMap(id => {
     const dish = dishesById.get(id);
     return dish ? [dish] : [];
@@ -80,8 +80,8 @@ export async function saveMealPlanDays(userId: string, days: MealPlanDay[]): Pro
   if (error) throw error;
 }
 
-// Städar bort sparade dagar efter planens sista dag, så att databasen
-// matchar det som visas efter att hela planen slumpats om.
+// Ta bort sparade dagar efter planens slut så att databasen
+// matchar den omslumpade matsedeln
 export async function deleteMealPlanAfter(userId: string, lastDate: string): Promise<void> {
   const { error } = await supabase
     .from('meal_plan_days')

@@ -1,4 +1,3 @@
-/* Container för hela sidan */
 .saved-page {
   display: flex;
   flex-direction: column;
@@ -6,7 +5,7 @@
   height: 100%;
 }
 
-/* --- Sök och Filter --- */
+/* Sök & filter */
 .saved-header {
   margin-bottom: 24px;
 }
@@ -69,7 +68,7 @@
   transform: scale(0.95);
 }
 
-/* Dropdown för sortering/filtrering */
+/* Sortering-& filtrering meny */
 .filter-dropdown {
   display: flex;
   flex-direction: column;
@@ -113,7 +112,7 @@
   font-size: 0.9rem;
 }
 
-/* --- Flikar (Tabs) --- */
+/* Statusflikar */
 .saved-tabs {
   display: flex;
   justify-content: space-between;
@@ -134,16 +133,16 @@
 
 .tab-btn.active {
   color: var(--color-white);
-  border-bottom: 2px solid #d4a359; /* Accentfärg för aktiv flik */
+  border-bottom: 2px solid #d4a359; 
 }
 
-/* --- Listan och Korten --- */
+/* Lista med maträtter */
 .saved-list {
   display: flex;
   flex-direction: column;
   gap: 0.5px;
-  overflow-y: auto; /* Gör listan scrollbar */
-  padding-bottom: 100px; /* Så sista kortet inte döljs bakom navbaren */
+  overflow-y: auto; 
+  padding-bottom: 100px; 
 }
 
 .empty-state {
@@ -152,7 +151,7 @@
   margin-top: 32px;
 }
 
-/* --- Dynamiska Knappar (Children i DishCard) --- */
+/* Åtgärdsknappar */
 .compact-actions {
   display: flex;
   align-items: center;
@@ -194,7 +193,7 @@
 }
 
 .action-icon.remove {
-  color: #F44336; /* Rött kryss */
+  color: #F44336; 
 }
 
 .action-icon.remove:hover {
@@ -202,6 +201,7 @@
   opacity: 1;
 }
 
+/* Desktop */
 @media (min-width: 768px) {
   .saved-header,
   .saved-list {
@@ -217,6 +217,7 @@
   }
 }
 
+/* Mobil */
 @media (max-width: 767px) {
   .saved-list .dish-card-actions {
     top: auto;

@@ -1,4 +1,4 @@
-/* Shared modal layout and form controls */
+/* Modal-styleing */
 .modal-overlay,
 .month-modal-overlay {
   position: fixed;
@@ -118,8 +118,7 @@
   color: var(--color-active);
 }
 
-/* Edit day-modals CSS */
-/* Edit day modal */
+/* EditDayModal */
 .edit-day-content {
   width: min(92%, 480px);
   max-height: 85vh;
@@ -277,7 +276,7 @@
   color: var(--color-ink);
 }
 
-/* Month modal */
+/* MonthModal */
 .month-modal-content {
   background-color: var(--color-ui);
   color: var(--color-white);
@@ -431,6 +430,7 @@
   text-align: center;
 }
 
+/* Desktop */
 @media (min-width: 768px) {
   .grid-header-cell {
     font-size: 0.9rem;
@@ -445,6 +445,7 @@
   }
 }
 
+/* Mobil */
 @media (max-width: 767px) {
   .month-modal-content {
     padding: 12px;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Moon, Sun, LogIn, LogOut } from 'lucide-react'; // Importerar LogIn istället för User
+import { Moon, Sun, LogIn, LogOut } from 'lucide-react'; 
 import Navbar from './Navbar';
 import { useThemeContext } from '../context/useThemeContext';
 import { useAuth } from '../context/useAuth';
@@ -10,7 +10,6 @@ export default function Header() {
   const { theme, toggleTheme } = useThemeContext();
   const nextTheme = theme === 'light' ? 'dark' : 'light';
 
-  // Hämta user (inloggad användare) och signOut (utloggningsfunktion)
   const { user, signOut, authPrompt, clearAuthPrompt } = useAuth();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const isAuthModalOpen = isLoginModalOpen || authPrompt !== null;

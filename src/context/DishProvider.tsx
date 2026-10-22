@@ -83,7 +83,7 @@ const parseStatusRow = (value: unknown): [string, DishStatus] | null => {
 
 const EMPTY_MEAL_PLAN: MealPlanDay[] = [];
 
-// --- HJÄLPFUNKTION: Bygger ut matsedeln till 35 dagar ---
+// Bygg ut matsedeln till 35 dagar
 const generateFullPlan = (
   currentPlan: MealPlanDay[],
   availableDishes: Dish[],
@@ -97,10 +97,10 @@ const generateFullPlan = (
   const offsetToday = today.getTimezoneOffset() * 60000;
   const todayStr = new Date(today.getTime() - offsetToday).toISOString().slice(0, 10);
 
-  // 1. Behåll historik
+  // Behåll historik
   const historyDays = currentPlan.filter(day => day.date < todayStr);
 
-  // 2. Bygg kommande 35 dagar
+  // Skapa kommande 35 dagar
   const upcomingDays: MealPlanDay[] = [];
   
   for (let i = 0; i < 35; i++) {
@@ -266,8 +266,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     };
   }, [user]);
 
-  // Samma mönster som för recept och statusar: planen hör till en användare,
-  // så en utloggad eller ny användare ser aldrig någon annans matsedel.
+  // Håll matsedeln kopplad till rätt användare
   const [mealPlanState, setMealPlanState] = useState<{
     userId: string | null;
     plan: MealPlanDay[];
@@ -295,7 +294,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     }
   }, [user]);
 
-  // Hämta sparad matsedel när användaren är inloggad och recepten är laddade.
+  // Hämta sparad matsedel när användaren är inloggad och recepten är laddade
   useEffect(() => {
     if (!user || dishesLoading || dishesError) return;
 
@@ -546,7 +545,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     const todayStr = new Date(today.getTime() - offset).toISOString().slice(0, 10);
 
     commitMealPlan(nextPlan);
-    // Historik ändras inte, så bara dagar från och med idag sparas.
+    // Historiken ändras inte, så bara dagar från och med idag sparas
     void persistMealPlan(
       nextPlan.filter(day => day.date >= todayStr),
       nextPlan[nextPlan.length - 1]?.date

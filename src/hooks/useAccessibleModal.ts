@@ -13,6 +13,7 @@ export function useAccessibleModal(isOpen: boolean, onClose: () => void) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
 
+  // Håll den senaste onClose-funktionen tillgänglig
   useEffect(() => {
     onCloseRef.current = onClose;
   }, [onClose]);
@@ -34,11 +35,13 @@ export function useAccessibleModal(isOpen: boolean, onClose: () => void) {
       (focusableElements()[0] ?? dialog).focus();
     });
 
+    // Bara den översta modalen ska hantera tangenttryckningar.
     const isTopmostDialog = () => {
       const dialogs = document.querySelectorAll<HTMLElement>('[data-a11y-dialog="true"]');
       return dialogs.item(dialogs.length - 1) === dialog;
     };
 
+     // Stäng med Escape och håll tangentbordsfokus inne i modalen.
     const handleKeyDown = (event: KeyboardEvent) => {
       if (!isTopmostDialog()) return;
 

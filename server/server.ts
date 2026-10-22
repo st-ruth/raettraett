@@ -30,10 +30,10 @@ if (!dishesFilePath) {
   throw new Error('Kunde inte hitta dishes.json bredvid servern eller dess dist-mapp.');
 }
 
-// GET-route: Uppfyller VG-kravet genom att agera mellanhand mot tredjeparts-API (Supabase)
+// GET-route: agerar mellanhand mot tredjeparts-API (Supabase)
 app.get('/api/dishes', async (req, res) => {
   try {
-    // 1. Läs dina hårdkodade bas-rätter från json
+    // 1. Läs hårdkodade bas-rätter från json
     const jsonData = fs.readFileSync(dishesFilePath, 'utf-8');
     const jsonDishes = JSON.parse(jsonData);
 

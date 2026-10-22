@@ -1,22 +1,19 @@
-/* Container som fäster hela navbaren i botten */
 .navbar-container {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 0; /* Mörk bakgrund så den smälter in snyggt */
-  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); /* Skugga uppåt */
+  bottom: 0; 
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3); 
   background-color: var(--color-ui);
   z-index: 100; 
 }
 
-/* Själva nav-elementet som lägger ikonerna på rad */
 .navbar {
   display: flex;
   justify-content: space-around;
   padding: 12px 0;
 }
 
-/* Stilen för varje enskild knapp/ikon */
 .nav-item {
   background: none;
   border: none;
@@ -24,17 +21,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px; /* Mellanrum mellan ikon och text */
+  gap: 4px; 
   cursor: pointer;
 }
 
-/* Storleken på själva ikonen */
 .nav-icon {
   width: 24px;
   height: 24px;
 }
 
-/* VG-touch: Hover-effekt och färg för den vy man är inne på (aktiv) */
 .nav-item:hover,
 .nav-item.active {
   color: var(--color-active);
@@ -44,6 +39,7 @@
   display: none;
 }
 
+/* Desktop */
 @media (min-width: 768px) {
   .navbar-container {
     position: static;

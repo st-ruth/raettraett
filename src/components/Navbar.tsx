@@ -1,4 +1,3 @@
-// Navigationsmeny alltid synlig i botten på mobilversion. Dataversionen får jag fundera på
 import '../styles/navbar.css';
 import { NavLink } from 'react-router-dom';
 import { Home, Dices, CalendarDays, Heart } from 'lucide-react';

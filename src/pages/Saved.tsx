@@ -4,7 +4,7 @@ import DishFormModal from '../components/DishFormModal';
 import { useDishContext } from '../context/useDishContext'; 
 import { useAuth } from '../context/useAuth';
 import { useDishFilter } from '../hooks/useDishFilter';
-import type { DishStatus, ProteinType } from '../types/dish'; // <-- Linter fix: Importerar ProteinType
+import type { DishStatus, ProteinType } from '../types/dish'; 
 import { Plus, X, SlidersHorizontal, Smile, Meh, Trash, Clock } from 'lucide-react';
 import '../styles/saved.css';
 
@@ -166,7 +166,7 @@ export default function Saved() {
               <select
                 id="protein-select"
                 value={proteinFilter}
-                onChange={(e) => setProteinFilter(e.target.value as ProteinType | 'all')} // <-- Linter fix!
+                onChange={(e) => setProteinFilter(e.target.value as ProteinType | 'all')}
                 className="filter-select"
               >
                 <option value="all">Alla proteiner</option>

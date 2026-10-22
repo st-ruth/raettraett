@@ -1,4 +1,4 @@
-/* Grundläggande styling som alla kort delar */
+/* Grundstil för alla kort*/
 .dish-card {
   border: 1px solid var(--color-ui, #33333d); 
   color: var(--color-active, #ffffff);
@@ -63,24 +63,22 @@
   padding: 16px;
   width: 100%;
   box-sizing: border-box;
-  margin-top: auto; /* Trycker ner knapparna i botten på kortet */
+  margin-top: auto; 
 }
 
-/* =========================================
-   VARIANTER (Styr storleken)
-   ========================================= */
+/* VARIANTER */
 
-/* 1. Hero (För Home & Randomizer) - Fyller nästan hela skärmen */
+/* Hero */
 .dish-card.hero {
-  height: 60vh; /* Tar upp 60% av skärmhöjden */
+  height: 60vh; 
   margin: 0 auto;
 }
 
 .dish-card.hero h2 {
-  font-size: 1.8rem; /* Större rubrik på hero-kortet */
+  font-size: 1.8rem; 
 }
 
-/* 2. Calendar (För 3-dagarsvyn) - Lagom höga, staplade */
+/* Kalenderkort */
 .dish-card.calendar {
   height: 180px; 
   margin: 8px auto;
@@ -132,11 +130,11 @@
   justify-content: flex-start;
 }
 
-/* 3. Compact (För sparade listor) - Endast en smal rad */
+/* Kompakta kort */
 .dish-card.compact {
   height: auto;
   margin: 6px 0;
-  background: rgba(30, 30, 36, 0.85); /* Mer solid bakgrund för listor */
+  background: rgba(30, 30, 36, 0.85); 
 }
 
 .dish-card.compact .dish-card-content {

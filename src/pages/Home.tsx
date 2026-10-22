@@ -1,7 +1,3 @@
-// Dagsfokus "ska lagas idag"
-// Ska jag ha semantik med h1 på korten?
-// Lägg till knappar för ny mat samt ta till kalender
-
 import { useNavigate } from 'react-router-dom';
 import { Dices, MessageSquareMore } from 'lucide-react';
 import DishCard from '../components/DishCard';

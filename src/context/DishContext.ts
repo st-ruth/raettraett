@@ -1,5 +1,3 @@
-//Ritningen/typerna och sjävla createContext
-
 import { createContext } from 'react';
 import type { Dish, DishStatus } from '../types/dish';
 import type { MealPlanDay } from '../types/mealPlan';

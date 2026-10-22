@@ -125,7 +125,6 @@ export default function CalendarPage() {
   const scrollToCard = (date: Date) => {
     const element = document.querySelector(`[data-date="${date.toISOString()}"]`);
     if (element) {
-        // Ändrat till block: 'center' eller 'start' med scroll-margin
         element.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
@@ -140,7 +139,7 @@ export default function CalendarPage() {
         return cardDate === todayStr;
       });
 
-      // Ändrat till block: 'center' så det hamnar fritt från toppmenyn!
+      // Centrera dagens kort så att det inte hamnar under toppmenyn
       todayCard?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 150);
 
@@ -151,7 +150,7 @@ export default function CalendarPage() {
     <div className="calendar-page">
       <h1 className="visually-hidden">Kalender</h1>
 
-      {/* --- TOP STRIP --- */}
+      {/* Veckoremsan */}
       <div className="calendar-top-strip">
         <div className="strip-header">
            <button
@@ -263,7 +262,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      {/* --- KORT-VYN (Infinity scroll) --- */}
+      {/* Kortvyn med scrollning */}
       <div className="calendar-cards-container" ref={cardsContainerRef}>
         {dynamicMealPlan.map((day) => {
           const dateLabel = day.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'numeric' });

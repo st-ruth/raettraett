@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Enkel funktion för att logga ut
+  // Logga ut
   const signOut = async () => {
     await supabase.auth.signOut();
   };

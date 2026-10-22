@@ -96,7 +96,7 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
     }
   };
 
-  // Förhindra att sidan i bakgrunden scrollas när modalen är öppen
+  // Stäng modalen vid klick på bakgrunden
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget && !isSaving) {
       handleClose();
@@ -193,7 +193,7 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
           <legend className="form-group-label">Tillagningstid</legend>
           <div className="form-checkboxes">
             <label className="checkbox-label">
-              {/* Radioknappar med samma 'name' gör att bara en kan väljas */}
+            
               <input type="radio" name="cookingTime" value="quick" />
               <span><Clock size={16} aria-hidden="true" /> Snabbmat (&lt; 30 min)</span>
             </label>

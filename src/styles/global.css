@@ -1,4 +1,4 @@
-/* Shared design tokens */
+/* Variabler */
 :root {
   --color-white: #ffffff;
   --color-ink: #1e1e24;
@@ -14,7 +14,7 @@
   --color-focus: var(--color-ink);
 }
 
-/* Dark theme */
+/* Mörkt tema */
 [data-theme="dark"] {
   --color-ui: rgb(39, 14, 11);
   --color-ui-transparent: rgba(39, 14, 11, 0.586);

@@ -74,7 +74,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
         tabIndex={-1}
       >
 
-        {/* Header */}
+        {/* Rubrik */}
         <div className="month-modal-header">
           <div className="month-modal-heading">
             <h2 id={titleId}>Matsedel</h2>
@@ -123,10 +123,10 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                   month: 'long',
                 })}${plannedDay?.recipes.length ? `: ${plannedDay.recipes.map(recipe => recipe.title).join(', ')}` : ''}${plannedDay?.status === 'eating_out' ? ': äter borta' : ''}${(!plannedDay || (!plannedDay.recipes.length && plannedDay.status !== 'eating_out' && !plannedDay.customNote)) ? ': ingen planerad måltid' : ''}${plannedDay?.status === 'locked' ? ', låst dag' : ''}${plannedDay?.customNote ? `, personlig notis: ${plannedDay.customNote}` : ''}. Öppna planeringen för dagen.`}
               >
-                {/* Datum */}
+
                 <span className="date-number">{date.getDate()}</span>
 
-                {/* Visa dagens planerade mat */}
+                {/* Dagsplanering & status */}
                 {plannedDay && (
                   <>
                     {plannedDay.status === 'eating_out' ? (
@@ -152,12 +152,12 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                       </>
                     ) : plannedDay.customNote ? (
                       <span className="cell-dish-title cell-day-status">
-                        {/* Visa bara en ikon om det inte finns mat men en notering */}
+                        {/* Kommentarikon: endast kommentar */}
                         <MessageSquareMore size={16} />
                       </span>
                     ) : null}
 
-                    {/* Låsmarkering uppe i hörnet */}
+                    {/* Låsmarkering */}
                     {plannedDay.status === 'locked' && (
                       <span
                         className="month-cell-lock"
@@ -166,7 +166,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
                       </span>
                     )}
 
-                    {/* Kommentar-ikon nere i hörnet (om det finns både mat och kommentar) */}
+                    {/* Kommentarikon mat && kommentar */}
                     {plannedDay.customNote && plannedDay.recipes.length > 0 && (
                       <span
                         className="month-cell-note"
@@ -181,7 +181,7 @@ export default function MonthModal({ onClose }: MonthModalProps) {
           })}
         </div>
 
-        {/* Bottenknapp */}
+        {/* Slumpa */}
         <div className="month-modal-actions">
           <button
             type="button"
