@@ -157,7 +157,7 @@ export function DishProvider({ children }: { children: ReactNode }) {
     message: string;
     type: 'error' | 'status';
   } | null>(null);
-//
+
   useEffect(() => {
     let isCurrentRequest = true;
     userDishStatusesRef.current = {};

@@ -6,7 +6,7 @@ import '../styles/actionButtons.css';
 import '../styles/randomizer.css';
 
 export default function Home() {
-  const { mealPlan, randomizeMealPlanDay } = useDishContext();
+  const { mealPlan, randomizeMealPlanDay, dishesLoading, dishesError } = useDishContext();
   
   const navigate = useNavigate();
   const today = new Date();
@@ -33,31 +33,39 @@ export default function Home() {
       </div>
       
       <div className="home-day-content">
-        {todayPlan?.status === 'eating_out' ? (
-          <DishCard title="Äter borta" dateLabel={dateLabel} variant="hero">
-            {homeActions}
-          </DishCard>
-        ) : todayPlan?.recipes.length ? (
-          <DishCard
-            dish={todayPlan.recipes.length === 1 ? todayPlan.recipes[0] : undefined}
-            recipes={todayPlan.recipes}
-            dateLabel={dateLabel}
-            variant="hero"
-          >
-            {homeActions}
-          </DishCard>
-        ) : todayPlan?.customNote ? (
-          <div className="home-day-card">
-            <HomeDayNote note={todayPlan.customNote} />
-            {homeActions}
-          </div>
+        {dishesLoading ? (
+          <p role="status" aria-live="polite">Hämtar recept...</p>
+        ) : dishesError ? (
+          <p role="alert">{dishesError}</p>
         ) : (
-          <DishCard title="Inget planerat" dateLabel={dateLabel} variant="hero">
-            {homeActions}
-          </DishCard>
-        )}
-        {todayPlan?.customNote && (todayPlan.recipes.length > 0 || todayPlan.status === 'eating_out') && (
-          <HomeDayNote note={todayPlan.customNote} />
+          <>
+            {todayPlan?.status === 'eating_out' ? (
+              <DishCard title="Äter borta" dateLabel={dateLabel} variant="hero">
+                {homeActions}
+              </DishCard>
+            ) : todayPlan?.recipes.length ? (
+              <DishCard
+                dish={todayPlan.recipes.length === 1 ? todayPlan.recipes[0] : undefined}
+                recipes={todayPlan.recipes}
+                dateLabel={dateLabel}
+                variant="hero"
+              >
+                {homeActions}
+              </DishCard>
+            ) : todayPlan?.customNote ? (
+              <div className="home-day-card">
+                <HomeDayNote note={todayPlan.customNote} />
+                {homeActions}
+              </div>
+            ) : (
+              <DishCard title="Inget planerat" dateLabel={dateLabel} variant="hero">
+                {homeActions}
+              </DishCard>
+            )}
+            {todayPlan?.customNote && (todayPlan.recipes.length > 0 || todayPlan.status === 'eating_out') && (
+              <HomeDayNote note={todayPlan.customNote} />
+            )}
+          </>
         )}
       </div>
     </div>

@@ -83,7 +83,10 @@ export default function DishFormModal({ isOpen, onClose }: DishFormModalProps) {
     setSaveError(null);
     try {
       const savedDish = await addDish(dish);
-      if (!savedDish) return;
+      if (!savedDish) {
+        setSaveError('Maträtten kunde inte sparas. Försök igen.');
+        return;
+      }
       onClose();
     } catch (error) {
       setSaveError(

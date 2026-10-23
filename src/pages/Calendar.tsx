@@ -27,7 +27,7 @@ export default function CalendarPage() {
   const [activeDate, setActiveDate] = useState(new Date());
   const hasCheckedAuthOnEntry = useRef(false);
 
-  const { mealPlan } = useDishContext();
+  const { mealPlan, dishesLoading, dishesError } = useDishContext();
   const { user, loading, requireAuth } = useAuth();
 
   useEffect(() => {
@@ -264,68 +264,74 @@ export default function CalendarPage() {
 
       {/* Kortvyn med scrollning */}
       <div className="calendar-cards-container" ref={cardsContainerRef}>
-        {dynamicMealPlan.map((day) => {
-          const dateLabel = day.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'numeric' });
-          
-          return (
-            <div 
-              key={day.id} 
-              className="calendar-day-card"
-              data-date={day.date.toISOString()}
-            >
-              {!day.plannedDay ? (
-                <DishCard
-                  title="Inget planerat"
-                  dateLabel={dateLabel}
-                  variant="calendar"
-                  showGhostBadge
-                />
-              ) : (
-                <div className="calendar-day-content">
-                  {day.plannedDay.status === 'eating_out' ? (
-                    <DishCard title="Äter borta" dateLabel={dateLabel} variant="calendar" />
-                  ) : day.plannedDay.recipes.length > 0 ? (
-                    day.plannedDay.recipes.length > 1 ? (
-                      <DishCard
-                        recipes={day.plannedDay.recipes}
-                        dateLabel={dateLabel}
-                        variant="calendar"
-                      />
+        {dishesLoading ? (
+          <p role="status" aria-live="polite">Hämtar recept...</p>
+        ) : dishesError ? (
+          <p role="alert">{dishesError}</p>
+        ) : (
+          dynamicMealPlan.map((day) => {
+            const dateLabel = day.date.toLocaleDateString('sv-SE', { weekday: 'long', day: 'numeric', month: 'numeric' });
+            
+            return (
+              <div 
+                key={day.id} 
+                className="calendar-day-card"
+                data-date={day.date.toISOString()}
+              >
+                {!day.plannedDay ? (
+                  <DishCard
+                    title="Inget planerat"
+                    dateLabel={dateLabel}
+                    variant="calendar"
+                    showGhostBadge
+                  />
+                ) : (
+                  <div className="calendar-day-content">
+                    {day.plannedDay.status === 'eating_out' ? (
+                      <DishCard title="Äter borta" dateLabel={dateLabel} variant="calendar" />
+                    ) : day.plannedDay.recipes.length > 0 ? (
+                      day.plannedDay.recipes.length > 1 ? (
+                        <DishCard
+                          recipes={day.plannedDay.recipes}
+                          dateLabel={dateLabel}
+                          variant="calendar"
+                        />
+                      ) : (
+                        <DishCard
+                          dish={day.plannedDay.recipes[0]}
+                          dateLabel={dateLabel}
+                          variant="calendar"
+                        />
+                      )
                     ) : (
-                      <DishCard
-                        dish={day.plannedDay.recipes[0]}
-                        dateLabel={dateLabel}
-                        variant="calendar"
-                      />
-                    )
-                  ) : (
-                    !day.plannedDay.customNote && (
-                      <DishCard
-                        title="Inget planerat"
-                        dateLabel={dateLabel}
-                        variant="calendar"
-                        showGhostBadge
-                      />
-                    )
-                  )}
+                      !day.plannedDay.customNote && (
+                        <DishCard
+                          title="Inget planerat"
+                          dateLabel={dateLabel}
+                          variant="calendar"
+                          showGhostBadge
+                        />
+                      )
+                    )}
 
-                  {day.plannedDay.customNote && (
-                    <div
-                      className={`calendar-day-note ${
-                        day.plannedDay.status === 'eating_out' || day.plannedDay.recipes.length > 0
-                          ? 'calendar-day-note-after-card'
-                          : ''
-                      }`}
-                    >
-                      <MessageSquareMore size={20} aria-hidden="true" />
-                      <p>{day.plannedDay.customNote}</p>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                    {day.plannedDay.customNote && (
+                      <div
+                        className={`calendar-day-note ${
+                          day.plannedDay.status === 'eating_out' || day.plannedDay.recipes.length > 0
+                            ? 'calendar-day-note-after-card'
+                            : ''
+                        }`}
+                      >
+                        <MessageSquareMore size={20} aria-hidden="true" />
+                        <p>{day.plannedDay.customNote}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })
+        )}
       </div>
 
       <div className="sticky-btn-container">
